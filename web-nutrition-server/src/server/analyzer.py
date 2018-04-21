@@ -15,42 +15,51 @@ class Analyzer(object):
         
         article.parse()
         if not article.text:
-            return {'error': 'Failed to parse document'}
+            return {'error': 'Failed to process document'}
             
         print(article.text.encode("utf-8"))
         
         readability = textstat.flesch_reading_ease(article.text)
+        flesch_kincaid_grade = textstat.flesch_kincaid_grade(article.text)
+        dale_chall_readability_score = textstat.dale_chall_readability_score(article.text)
+        linsear_write_formula = textstat.linsear_write_formula(article.text)
+        gunning_fog = textstat.gunning_fog(article.text)
         
         # readability + some mock data
         return {'nutrition': [
             {
                 "name": "readability",
-                "display": "readability",
+                "display": "readability: " + str(round(readability)) + "%",
                 "value": readability,
+                "percentage": readability,
                 "color": "#f00"
             },
             {
-                "name": "topicality",
-                "display": "topicality",
-                "value": 50,
+                "name": "flesch_kincaid_grade",
+                "display": "flesch kincaid grade: " + str(round(flesch_kincaid_grade)),
+                "value": flesch_kincaid_grade,
+                "percentage": 100 - flesch_kincaid_grade * 100 / 20,
                 "color": "#fc0"
             },
             {
-                "name": "factuality",
-                "display": "factuality",
-                "value": 50,
+                "name": "dale_chall_readability_score",
+                "display": "dale chall readability: " + str(round(dale_chall_readability_score)),
+                "value": dale_chall_readability_score,
+                "percentage": 100 - dale_chall_readability_score * 100 / 12,
                 "color": "#0f0"
             },
             {
-                "name": "emotion",
-                "display": "emotion",
-                "value": 50,
+                "name": "linsear_write_formula",
+                "display": "linsear write formula: " + str(round(linsear_write_formula)),
+                "value": linsear_write_formula,
+                "percentage": 100 - linsear_write_formula * 100 / 20,
                 "color": "#0cc"
             },
             {
-                "name": "authority",
-                "display": "authority",
-                "value": 50,
+                "name": "gunning_fog",
+                "display": "gunning fog: " + str(round(gunning_fog)),
+                "value": gunning_fog,
+                "percentage": 100 - gunning_fog * 100 / 30,
                 "color": "#00f"
             }
         ]}
