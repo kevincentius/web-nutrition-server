@@ -1,7 +1,7 @@
 
 Recommended setup guide (may be incomplete):
 
-- IDE: [Eclipse (PyDev](http://www.eclipse.org/downloads/)
+- IDE: [Eclipse (PyDev](http://www.eclipse.org/downloads/packages/eclipse-ide-java-developers/oxygen3a)
 - Open Eclipse and choose a folder (workspace)
 - Install PyDev:
 	- In Eclipse: Help -> Install new software...
