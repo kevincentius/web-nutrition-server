@@ -1,15 +1,18 @@
 
 from newspaper import Article
 from textstat.textstat import textstat
-
+from virality import Virality
 
 class Analyzer(object):
+
+    def __init__(self):
+        self.virality = Virality()
 
     def analyze(self, url):
         article = Article(url)
         
         print('downloading', url)
-        print(article.download())
+        article.download()
         if article.download_state == 0: #ArticleDownloadState.NOT_STARTED is 0
             return {'error': 'Failed to retrieve from ' + url}
         
@@ -20,7 +23,7 @@ class Analyzer(object):
         print(article.text.encode("utf-8"))
         
         readability = textstat.flesch_reading_ease(article.text)
-        flesch_kincaid_grade = textstat.flesch_kincaid_grade(article.text)
+        virality = self.virality.get_virality(article.html)
         dale_chall_readability_score = textstat.dale_chall_readability_score(article.text)
         linsear_write_formula = textstat.linsear_write_formula(article.text)
         gunning_fog = textstat.gunning_fog(article.text)
@@ -35,10 +38,10 @@ class Analyzer(object):
                 "color": "#f00"
             },
             {
-                "name": "flesch_kincaid_grade",
-                "display": "flesch kincaid grade: " + str(round(flesch_kincaid_grade)),
-                "value": flesch_kincaid_grade,
-                "percentage": 100 - flesch_kincaid_grade * 100 / 20,
+                "name": "virality",
+                "display": "virality: " + str(round(virality)),
+                "value": virality,
+                "percentage": virality,
                 "color": "#fc0"
             },
             {
