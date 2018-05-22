@@ -28,12 +28,16 @@ class Virality(object):
     def get_title(self, html):
         parser = etree.XMLParser(encoding='UTF-8', recover=True)
         tree = etree.parse(StringIO(html), parser)
-
+        
         for i in range(1, 5):
             element = tree.find('//h' + str(i))
             if element is not None:
                 return element.text
-
+            
+        if self.debug:
+            print('Cannot find title: h tag not found')
+            print('HTML:', html)
+        
         return None;
 
     def get_tweets_per_hour(self, title):
@@ -41,7 +45,8 @@ class Virality(object):
         time_array = []
         count = 1
         for tweet in results:
-            if Virality.debug:
+            if self.debug:
+                print(tweet)
                 print(count, tweet.created_at, tweet.text)
                 count = count + 1
 
@@ -55,10 +60,11 @@ class Virality(object):
 
     def get_virality(self, html):
         title = self.get_title(html)
+        print(title)
         timespan, tweets_per_hour = self.get_tweets_per_hour(title)
         virality = 100 - 1000 / (tweets_per_hour + 10)
 
-        if Virality.debug:
+        if self.debug:
             print('title = ' + title)
             print('timespan = ', timespan)
             print('tweets per hour = ', tweets_per_hour)
@@ -68,10 +74,9 @@ class Virality(object):
 
 if __name__ == '__main__':
     virality = Virality()
-    article = Article('http://www.nydailynews.com/new-york/harlem-school-aide-dragged-kindergartner-stage-10m-suit-article-1.3991176')
+    article = Article('https://www.wsj.com/articles/trump-to-demand-investigation-into-whether-fbi-infiltrated-his-campaign-1526849292')
 
-    if Virality.debug:
-        print('downloading')
+    print('downloading')
 
     article.download()
     if article.download_state == 0: #ArticleDownloadState.NOT_STARTED is 0
@@ -79,6 +84,5 @@ if __name__ == '__main__':
 
     score = virality.get_virality(article.html)
 
-    if Virality.debug:
-        print('virality = ', score)
+    print('virality = ', score)
 
