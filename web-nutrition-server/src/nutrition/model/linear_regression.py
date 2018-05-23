@@ -35,16 +35,20 @@ def eval_linear(data_set, test_size=0.4):
     # load training data from feature matrix
     x, y  = data_set.load_training_data()
     
+    # cross validation evaluation
+    model = linear_model.LinearRegression(normalize=True)
+    score = cross_val_score(model, x, y, scoring='neg_mean_squared_error')
+    print('Mean squared error: {}'.format(-score))
+    
+    
+    
+    # to visualize:
     # split data into train and test set
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=True, random_state=0)
     
     # train model on train set
     model = linear_model.LinearRegression(normalize=True)
     model.fit(x_train, y_train)
-    
-    # evaluate on test set
-    score = cross_val_score(model, x_test, y_test, scoring='neg_mean_squared_error')
-    print('Mean squared error: {}'.format(-score))
     
     # plot
     predict = model.predict(x_test)

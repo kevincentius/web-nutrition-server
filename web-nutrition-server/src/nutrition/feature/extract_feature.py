@@ -13,17 +13,19 @@ class FeatureExtractor(object):
     def extract_features(self, text, annotation):
         return stanford_feature.get_features(annotation)
         
-    def process_data_set(self, data_set):
+    def process_data_set(self, data_set, restart=False):
         self.data_set = data_set
         
         # load features we have extracted so far
         # this would not be needed if we use append file instead of np.savetxt to store the feature matrix
-        self.feature_matrix = self.data_set.load_feature_matrix()
-        
+        if not restart:
+            self.feature_matrix = self.data_set.load_feature_matrix()
+            
         # load count, i.e. how many documents have been parsed successfully
         counter = Counter(data_set.feature_path,
             commit_interval=50,
-            on_commit=self.save)
+            on_commit=self.save,
+            restart=restart)
         
         start = time.time()
         while counter.count < data_set.data['count']:
@@ -39,11 +41,11 @@ class FeatureExtractor(object):
             row = self.extract_features(text, annotation)
             row.append(label)
 
-            if self.feature_matrix is None:
+            if not hasattr(self, 'feature_matrix'):
                 self.feature_matrix = np.zeros([data_set.data['count'], len(row)])
             self.feature_matrix[counter.count,:] = row
             
-            # count annd print
+            # count and print
             counter.increment()
             print('%i, %i%% %.2f seconds (%.0f total))' % (counter.count-1, 100*counter.count/data_set.data['count'], time.time() - doc_start, time.time() - start))
             

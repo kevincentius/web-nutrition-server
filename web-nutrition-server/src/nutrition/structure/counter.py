@@ -2,17 +2,18 @@ import os
 
 class Counter(object):
 
-    def __init__(self, folder, commit_interval=1, on_commit=None):
+    def __init__(self, folder, commit_interval=1, on_commit=None, restart=False):
         self.path = folder + '/_count'
         self.commit_interval = commit_interval
         self.pending = 0
         self.on_commit = on_commit
         
-        # load count, i.e. how many documents have been parsed successfully
-        if os.path.exists(self.path):
+        if not restart and os.path.exists(self.path):
+            # load count, i.e. how many documents have been parsed successfully
             with open(self.path, 'r') as count_file:
                 self.count = int(count_file.read())
         else:
+            # start from beginning
             self.count = 0
     
     def increment(self):

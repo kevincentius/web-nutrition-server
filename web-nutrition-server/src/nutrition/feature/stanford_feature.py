@@ -106,6 +106,9 @@ def get_features(annotation):
         # number of VPs per sentence
         get_sum(non_terminal_count, ['VP']) / num_sentences,
         
+        # number of sub-sentences
+        get_sum(non_terminal_count, ['S']) / num_sentences,
+        
         
         # -------------- word tags --------------
         # ratio of pronouns
@@ -127,7 +130,6 @@ def get_features(annotation):
         
         # tokens per sentence
         token_count/ num_sentences
-        
     ]
 
 if __name__ == '__main__':
