@@ -10,7 +10,7 @@ import traceback
 
 class Analyzer(object):
 
-    debug = False
+    debug = True
 
     def __init__(self):
         self.virality = Virality()
