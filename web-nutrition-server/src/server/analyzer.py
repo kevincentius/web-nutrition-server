@@ -10,7 +10,7 @@ import traceback
 
 class Analyzer(object):
 
-    debug = True
+    debug = False
 
     def __init__(self):
         self.virality = Virality()
@@ -61,8 +61,13 @@ class Analyzer(object):
             f_readability = executor.submit(self.call, self.readability.get_readability, article.text)
             f_virality = executor.submit(self.call, self.virality.get_virality, article.html)
 
+        # read the results (error robustness: error in a label must not stop other labels from being delivered)
         readability = f_readability.result()
-        [virality, tweets_per_hour] = f_virality.result()
+        if (type(f_virality.result()) is list):
+            [virality, tweets_per_hour] = f_virality.result()
+        else:
+            print('error analyzing virality: future returned {}'.format(f_virality.result()))
+            [virality, tweets_per_hour] = [0, 0]
 
         if self.debug:
             stopwatch.finish()

@@ -53,7 +53,7 @@ class Virality(object):
             tweets_per_hour = len(time_array) * 3600 / timespan.total_seconds()
         else:
             tweets_per_hour = 0
-        return timespan, tweets_per_hour
+        return tweets_per_hour
 
     def get_virality(self, html):
         title = self.get_title(html)
@@ -61,12 +61,11 @@ class Virality(object):
         if self.debug:
             print(title)
         
-        timespan, tweets_per_hour = self.get_tweets_per_hour(title)
+        tweets_per_hour = self.get_tweets_per_hour(title)
         virality = 100 - 1000 / (tweets_per_hour + 10)
 
         if self.debug:
             print('title = ' + title)
-            print('timespan = ', timespan)
             print('tweets per hour = ', tweets_per_hour)
 
         return [virality, tweets_per_hour]
