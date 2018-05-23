@@ -30,7 +30,8 @@ class Analyzer(object):
             return 0
 
     def analyze(self, url):
-        stopwatch = Stopwatch('analyze')
+        if self.debug:
+            stopwatch = Stopwatch('analyze')
         
         article = Article(url)
         
