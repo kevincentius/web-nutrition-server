@@ -35,7 +35,7 @@ def parse(data_set):
         })
         
         if type(annotation) is str:
-            print('Error returned by stanford parser:', str)
+            print('Error returned by stanford parser:', annotation)
             sys.exit()
         
         # pickle the result

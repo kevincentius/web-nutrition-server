@@ -6,6 +6,7 @@ from server.virality import Virality
 from server.stopwatch import Stopwatch
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
+import traceback
 
 class Analyzer(object):
 
@@ -21,10 +22,11 @@ class Analyzer(object):
             
             result = func(*args)
             if self.debug:
-                print('{} returned {:.0f} in {:.2f} seconds'.format(func.__name__, result, time.time() - start_time))
+                print('{} returned {} in {:.2f} seconds'.format(func.__name__, result, time.time() - start_time))
             return result
         except:
             print('error when calling', func)
+            traceback.print_exc()
             return 0
 
     def analyze(self, url):
@@ -60,7 +62,7 @@ class Analyzer(object):
             f_virality = executor.submit(self.call, self.virality.get_virality, article.html)
 
         readability = f_readability.result()
-        virality = f_virality.result()
+        [virality, tweets_per_hour] = f_virality.result()
 
         if self.debug:
             stopwatch.finish()
@@ -80,7 +82,7 @@ class Analyzer(object):
             },
             {
                 "name": "virality",
-                "display": "virality: " + str(round(virality)),
+                "display": "virality: {:.3g} tweets per hour".format(tweets_per_hour),
                 "value": virality,
                 "percentage": virality,
                 "color": "#fc0"

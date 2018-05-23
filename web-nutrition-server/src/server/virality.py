@@ -1,9 +1,8 @@
 
 import tweepy
-from lxml import etree
 from newspaper import Article
-from io import StringIO
 import datetime
+from lxml.html import document_fromstring
 
 class Virality(object):
 
@@ -25,11 +24,10 @@ class Virality(object):
         self.api = tweepy.API(auth)
 
     def get_title(self, html):
-        parser = etree.XMLParser(encoding='UTF-8', recover=True)
-        tree = etree.parse(StringIO(html), parser)
+        document = document_fromstring(html)
         
         for i in range(1, 5):
-            element = tree.find('//h' + str(i))
+            element = document.find('.//h' + str(i))
             if element is not None:
                 return element.text
             
@@ -71,7 +69,7 @@ class Virality(object):
             print('timespan = ', timespan)
             print('tweets per hour = ', tweets_per_hour)
 
-        return virality
+        return [virality, tweets_per_hour]
 
 
 if __name__ == '__main__':
