@@ -1,9 +1,10 @@
 #!/usr/bin/env python
  
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse, parse_qs
 import json
-from analyzer import Analyzer
+from urllib.parse import urlparse, parse_qs
+from server.analyzer import Analyzer
+
 
 # HTTPRequestHandler class
 class RestServer(BaseHTTPRequestHandler):

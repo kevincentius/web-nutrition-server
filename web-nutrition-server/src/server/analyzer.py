@@ -1,30 +1,71 @@
 
 from newspaper import Article
 from textstat.textstat import textstat
-from virality import Virality
+from server.readability import Readability
+from server.virality import Virality
+from server.stopwatch import Stopwatch
+import time
+from concurrent.futures.thread import ThreadPoolExecutor
 
 class Analyzer(object):
 
+    debug = True
+
     def __init__(self):
         self.virality = Virality()
+        self.readability = Readability()
+
+    def call(self, func, *args):
+        try:
+            start_time = time.time()
+            
+            result = func(*args)
+            if self.debug:
+                print('{} returned {:.0f} in {:.2f} seconds'.format(func.__name__, result, time.time() - start_time))
+            return result
+        except:
+            print('error when calling', func)
+            return 0
 
     def analyze(self, url):
+        stopwatch = Stopwatch('analyze')
+        
         article = Article(url)
         
-        print('downloading', url)
+        # download full page from url
+        if self.debug:
+            stopwatch.lap('downloading {}'.format(url))
+        
         article.download()
         if article.download_state == 0: #ArticleDownloadState.NOT_STARTED is 0
             return {'error': 'Failed to retrieve from ' + url}
         
+        # extract the main text content of the page
+        if self.debug:
+            stopwatch.lap('newspaper3k parsing')
+            
         article.parse()
         if not article.text:
             return {'error': 'Failed to process document'}
-            
-        print(article.text.encode("utf-8"))
         
-        readability = textstat.flesch_reading_ease(article.text)
-        virality = self.virality.get_virality(article.html)
-        dale_chall_readability_score = textstat.dale_chall_readability_score(article.text)
+        if self.debug:
+            print(article.text.encode("utf-8"))
+                
+        # start nutrition label analysis in parallel
+        if self.debug:
+            stopwatch.lap('analzying nutrition labels')
+        
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            f_readability = executor.submit(self.call, self.readability.get_readability, article.text)
+            f_virality = executor.submit(self.call, self.virality.get_virality, article.html)
+
+        readability = f_readability.result()
+        virality = f_virality.result()
+
+        if self.debug:
+            stopwatch.finish()
+            
+        flesch_reading_ease = textstat.flesch_reading_ease(article.text)
         linsear_write_formula = textstat.linsear_write_formula(article.text)
         gunning_fog = textstat.gunning_fog(article.text)
         
@@ -45,10 +86,10 @@ class Analyzer(object):
                 "color": "#fc0"
             },
             {
-                "name": "dale_chall_readability_score",
-                "display": "dale chall readability: " + str(round(dale_chall_readability_score)),
-                "value": dale_chall_readability_score,
-                "percentage": 100 - dale_chall_readability_score * 100 / 12,
+                "name": "flesch_reading_ease",
+                "display": "flesch reading ease: " + str(round(flesch_reading_ease)) + "%",
+                "value": flesch_reading_ease,
+                "percentage": flesch_reading_ease,
                 "color": "#0f0"
             },
             {

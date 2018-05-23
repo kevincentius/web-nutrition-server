@@ -2,13 +2,12 @@
 import tweepy
 from lxml import etree
 from newspaper import Article
-import lxml
 from io import StringIO
 import datetime
 
 class Virality(object):
 
-    debug = True
+    debug = False
 
     def __init__(self):
         consumer_key = "RvBkfoQWrJIAWrG1Ih6VRDRB1"
@@ -60,7 +59,10 @@ class Virality(object):
 
     def get_virality(self, html):
         title = self.get_title(html)
-        print(title)
+        
+        if self.debug:
+            print(title)
+        
         timespan, tweets_per_hour = self.get_tweets_per_hour(title)
         virality = 100 - 1000 / (tweets_per_hour + 10)
 
