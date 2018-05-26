@@ -56,8 +56,8 @@ def test_feature_selection(data_set):
                 b_id = c
                 b_error = c_error
         
-        x_train = np.delete(x_train, c, 1)
-        x_test = np.delete(x_test, c, 1)
+        x_train = np.delete(x_train, b_id, 1)
+        x_test = np.delete(x_test, b_id, 1)
         features = np.delete(features, b_id, 0)
         print(features, b_error)
         plot_x_num_features.append(len(x_test[0]))
