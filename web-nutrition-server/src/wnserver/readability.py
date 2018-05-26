@@ -2,7 +2,7 @@
 import pickle
 from nutrition.structure.environment import ROOT_FOLDER, READABILITY_MODEL, STANFORD_SERVER
 from pycorenlp.corenlp import StanfordCoreNLP
-from nutrition.feature.extract_feature import FeatureExtractor
+from nutrition.feature.extract_feature import extract_features
 
 class Readability(object):
 
@@ -30,7 +30,7 @@ class Readability(object):
             print('Error returned by stanford parser:', str)
             return 0
         
-        x = FeatureExtractor().extract_features(text, annotation)
+        x = extract_features(text, annotation)
         
         y = self.model.predict([x])[0]
         readability = max(0, min(6, (5-y))) * 100/6

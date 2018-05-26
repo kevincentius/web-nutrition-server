@@ -8,6 +8,9 @@ from nutrition.structure.data_set import DataSet
 import pickle
 from nutrition.structure.environment import ROOT_FOLDER
 
+from sklearn.feature_selection import RFE
+from pprint import pprint
+
 def train_linear(data_set):
     # load training data from feature matrix
     x, y  = data_set.load_training_data()
@@ -37,10 +40,9 @@ def eval_linear(data_set, test_size=0.4):
     
     # cross validation evaluation
     model = linear_model.LinearRegression(normalize=True)
+    #model = RFE(model, 10)
     score = cross_val_score(model, x, y, scoring='neg_mean_squared_error')
     print('Mean squared error: {}'.format(-score))
-    
-    
     
     # to visualize:
     # split data into train and test set
@@ -48,10 +50,21 @@ def eval_linear(data_set, test_size=0.4):
     
     # train model on train set
     model = linear_model.LinearRegression(normalize=True)
-    model.fit(x_train, y_train)
+    model = model.fit(x_train, y_train)
     
-    # plot
+    pprint(model)
+    print(model.coef_)
+    
+    # plot train performance
+    predict_train = model.predict(x_train)
+    plt.figure()
+    plt.title('train')
+    plt.scatter(y_train, predict_train)
+    
+    # plot test performance
     predict = model.predict(x_test)
+    plt.figure()
+    plt.title('test')
     plt.scatter(y_test, predict)
     plt.show()
 
@@ -71,21 +84,5 @@ def eval_cc_linear(train_data_set, test_data_set):
 
 
 if __name__ == '__main__':
-    data_set = DataSet('cepp')
-    
-    x, y  = data_set.load_training_data()
-    
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.4, shuffle=True, random_state=0)
-    
-    regr = linear_model.LinearRegression(normalize=True)
-    #regr = linear_model.Ridge(alpha=0.001, normalize=True)
-    
-    regr.fit(x_train, y_train)
-    predict = regr.predict(x_test)
-    
-    scores = cross_val_score(regr, x_test, y_test, scoring='neg_mean_squared_error')
-    print(scores.mean())
-    
-    plt.scatter(y_test, predict)
-    plt.show()
+    eval_linear(DataSet('cepp'))
     

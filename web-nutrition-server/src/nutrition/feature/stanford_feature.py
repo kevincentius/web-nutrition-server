@@ -4,8 +4,7 @@ This script is for extracting features from a stanford parse tree.
 import pickle
 
 from nltk.tree import Tree
-from nltk.stem.snowball import SnowballStemmer
-import pprint
+import sys
 
 def count_tags(sentence_trees):
     terminal_count = {}
@@ -38,25 +37,23 @@ def count_tags(sentence_trees):
 
 # 'Type VS Token' count
 # Tokens that contains no letter is ignored.
-# TODO: should we ignore punctuations, special characters? Refine the filter.
-def count_types(sentence_trees):
-    stemmer = SnowballStemmer('english')
+def count_types(annotation):
+    lemma_counts = {}
     
-    stem_counts = {}
-    
-    for tree in sentence_trees:
-        for pos in tree.treepositions():
-            node = tree[pos]
-            if type(node) is str:
-                if True in [c in node.lower() for c in 'abcdefghijklmnopqrstuvwxyz']:
-                    stem = stemmer.stem(node)
-                    if stem in stem_counts.keys():
-                        stem_counts[stem] += 1
-                    else:
-                        stem_counts[stem] = 1
-    
-    type_count = len(stem_counts)
-    token_count = sum(stem_counts.values())
+    for sentence in annotation['sentences']:
+        for token in sentence['tokens']:
+            # ignore tokens that has no letter in it (e.g. punctuations, numbers)
+            if not True in [c in  token['word'].lower() for c in 'abcdefghijklmnopqrstuvwxyz']:
+                continue
+            
+            lemma = token['lemma']
+            if lemma in lemma_counts:
+                lemma_counts[lemma] += 1
+            else:
+                lemma_counts[lemma] = 1
+            
+    type_count = len(lemma_counts)
+    token_count = sum(lemma_counts.values())
     return type_count, token_count
 
 # returns null safe sum of counts of tags listed as `labels`
@@ -96,31 +93,22 @@ def get_features(annotation):
     num_sentences = len(annotation['sentences'])
     sentence_trees = [Tree.fromstring(sentence['parse']) for sentence in annotation['sentences']]
     terminal_count, non_terminal_count = count_tags(sentence_trees)
-    type_count, token_count = count_types(sentence_trees)
+    type_count, token_count = count_types(annotation)
     
-    return [
-        # ------------- phrase tags -------------
-        # number of NPs per sentence
-        get_sum(non_terminal_count, ['NP', 'NX']) / num_sentences,
-        
-        # number of VPs per sentence
-        get_sum(non_terminal_count, ['VP']) / num_sentences,
-        
-        # number of sub-sentences
-        get_sum(non_terminal_count, ['S']) / num_sentences,
-        
-        
-        # -------------- word tags --------------
-        # ratio of pronouns
-        get_sum(terminal_count, ['PRP', 'PRP$', 'WP', 'WP$']) / num_sentences,       # possessive pronouns
-        
-        # preposition token per sentence
-        get_sum(terminal_count, ['NN', 'NNS', 'NNP', 'NNPS']) / num_sentences,       # nouns
-        
-        # noun token per sentence        
-        get_sum(terminal_count, ['IN']) / num_sentences,                             # preposition
-        
-        
+    phrase_tags = ['ADJP', 'ADVP', 'CONJP', 'FRAG', 'INTJ', 'LST', 'NAC', 'NP', 'NX', 'PP', 'PRN', 'PRT', 'QP', 'RRC', 'UCP', 'VP', 'WHADJP', 'WHAVP', 'WHNP', 'WHPP', 'X']
+    word_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS', 'PDT', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WP$', 'WRB']
+    
+    features = []
+    
+    for phrase_tag in phrase_tags:
+        features.append(get_sum(non_terminal_count, [phrase_tag]) / token_count)
+        features.append(get_sum(non_terminal_count, [phrase_tag]) / num_sentences)
+    
+    for word_tag in word_tags:
+        features.append(get_sum(terminal_count, [word_tag]) / token_count)
+        features.append(get_sum(terminal_count, [word_tag]) / num_sentences)
+    
+    features.extend([
         # --------------- others ----------------
         # number of non-terminal nodes per parse tree
         count_non_terminal_nodes(sentence_trees) / num_sentences,
@@ -129,12 +117,25 @@ def get_features(annotation):
         type_count / token_count,
         
         # tokens per sentence
-        token_count/ num_sentences
-    ]
+        token_count / num_sentences
+    ])
+    
+    return features
 
 if __name__ == '__main__':
-    with open('D:/master project/data/newsela/standford_annotate/' + str(1), 'rb') as file:
+    with open('D:/git/web-nutrition-server/web-nutrition-server/src/data/cepp/stanford/0', 'rb') as file:
         annotation = pickle.load(file)
+    
+    #pprint.pprint(annotation)
+    #sentence_trees = [Tree.fromstring(sentence['parse']) for sentence in annotation['sentences']]
+    #sentence_trees[0].pretty_print()
+    for sentence in annotation['sentences']:
+        for token in sentence['tokens']:
+            print(token['lemma'], token['word'], token['originalText'], token['pos'])
+    
+    print(count_types(annotation))    
+    
+    #sys.exit()
     
     print(get_features(annotation))
     
