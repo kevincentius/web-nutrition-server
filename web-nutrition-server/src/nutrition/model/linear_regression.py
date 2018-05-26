@@ -8,8 +8,8 @@ from nutrition.structure.data_set import DataSet
 import pickle
 from nutrition.structure.environment import ROOT_FOLDER
 
-from sklearn.feature_selection import RFE
 from pprint import pprint
+from sklearn.linear_model.base import LinearRegression
 
 def train_linear(data_set):
     # load training data from feature matrix
@@ -39,7 +39,7 @@ def eval_linear(data_set, test_size=0.4):
     x, y  = data_set.load_training_data()
     
     # cross validation evaluation
-    model = linear_model.LinearRegression(normalize=True)
+    model = LinearRegression(normalize=True)
     #model = RFE(model, 10)
     score = cross_val_score(model, x, y, scoring='neg_mean_squared_error')
     print('Mean squared error: {}'.format(-score))
@@ -49,11 +49,11 @@ def eval_linear(data_set, test_size=0.4):
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, shuffle=True, random_state=0)
     
     # train model on train set
-    model = linear_model.LinearRegression(normalize=True)
+    model = LinearRegression(normalize=True)
     model = model.fit(x_train, y_train)
+    print(model.coef_)
     
     pprint(model)
-    print(model.coef_)
     
     # plot train performance
     predict_train = model.predict(x_train)
