@@ -6,6 +6,26 @@ import pickle
 from nltk.tree import Tree
 import sys
 
+def count_sum_node_depth(sentence_trees):
+    total = 0
+    for tree in sentence_trees:
+        for pos in tree.treepositions():
+            node = tree[pos]
+            if type(node) is str:
+                total += len(pos)
+    
+    return total
+
+def count_sum_word_length(sentence_trees):
+    total = 0
+    for tree in sentence_trees:
+        for pos in tree.treepositions():
+            node = tree[pos]
+            if type(node) is str:
+                total += len(node)
+    
+    return total
+
 def count_tags(sentence_trees):
     terminal_count = {}
     non_terminal_count = {}
@@ -89,11 +109,39 @@ def count_non_terminal_nodes(sentence_trees):
 
     return count
 
+def count_nodes(terminal_count, non_terminal_count):
+    return sum(terminal_count.values()) + sum(non_terminal_count.values())
+
+def get_feature_names():
+    phrase_tags = ['ADJP', 'ADVP', 'CONJP', 'FRAG', 'INTJ', 'LST', 'NAC', 'NP', 'NX', 'PP', 'PRN', 'PRT', 'QP', 'RRC', 'UCP', 'VP', 'WHADJP', 'WHAVP', 'WHNP', 'WHPP', 'X']
+    word_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS', 'PDT', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WP$', 'WRB']
+    
+    features = []
+    
+    for phrase_tag in phrase_tags:
+        features.append(phrase_tag + '/Tkn')
+        features.append(phrase_tag + '/Stc')
+    
+    for word_tag in word_tags:
+        features.append(word_tag + '/Tkn')
+        features.append(word_tag + '/Stc')
+    
+    features.append('non-terminal-nodes')
+    features.append('types/Tkn')
+    features.append('types/Stc')
+    features.append('token/Stc')
+    features.append('nodes/Stc')
+    features.append('nodes/Tkn')
+    features.append('avg-node-depth')
+    features.append('avg-word-length')
+    return features
+
 def get_features(annotation):
     num_sentences = len(annotation['sentences'])
     sentence_trees = [Tree.fromstring(sentence['parse']) for sentence in annotation['sentences']]
     terminal_count, non_terminal_count = count_tags(sentence_trees)
     type_count, token_count = count_types(annotation)
+    node_count = count_nodes(terminal_count, non_terminal_count)
     
     phrase_tags = ['ADJP', 'ADVP', 'CONJP', 'FRAG', 'INTJ', 'LST', 'NAC', 'NP', 'NX', 'PP', 'PRN', 'PRT', 'QP', 'RRC', 'UCP', 'VP', 'WHADJP', 'WHAVP', 'WHNP', 'WHPP', 'X']
     word_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS', 'PDT', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WP$', 'WRB']
@@ -115,9 +163,20 @@ def get_features(annotation):
         
         # type-token ratio
         type_count / token_count,
+        type_count / num_sentences,
         
         # tokens per sentence
-        token_count / num_sentences
+        token_count / num_sentences,
+        
+        # number of nodes
+        node_count / num_sentences,
+        node_count / token_count,
+        
+        # average node depth
+        count_sum_node_depth(sentence_trees) / token_count,
+        
+        # average word length
+        count_sum_word_length(sentence_trees) / token_count
     ])
     
     return features
@@ -138,4 +197,6 @@ if __name__ == '__main__':
     #sys.exit()
     
     print(get_features(annotation))
+    print(len(get_features(annotation)))
+    print(len(get_feature_names()))
     
