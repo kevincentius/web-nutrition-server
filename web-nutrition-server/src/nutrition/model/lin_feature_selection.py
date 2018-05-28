@@ -41,6 +41,7 @@ def test_feature_selection(data_set):
     print(get_cv_error(x_train, x_test, y_train, y_test))
     
     target_num_features = 1
+    feature_ids = list(range(0, len(x_train[0])))
     features = get_feature_names() # list(range(0, len(x_train[0])))
     while len(x_train[0]) > target_num_features:
         # find least important feature to remove
@@ -60,7 +61,8 @@ def test_feature_selection(data_set):
         x_train = np.delete(x_train, b_id, 1)
         x_test = np.delete(x_test, b_id, 1)
         features = np.delete(features, b_id, 0)
-        print(features, b_error, len(x_train[0]))
+        feature_ids = np.delete(feature_ids, b_id, 0)
+        print(features, feature_ids, b_error, len(x_train[0]))
         plot_x_num_features.append(len(x_test[0]))
         plot_y_cv_error.append(b_error)
         
