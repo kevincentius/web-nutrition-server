@@ -52,6 +52,5 @@ class FeatureExtractor(object):
         counter.commit()
 
 if __name__ == '__main__':
-    data_set = DataSet('cepp')
-    FeatureExtractor().extract_from_data_set(data_set)
+    FeatureExtractor().process_data_set(DataSet('cepp'))
     

@@ -57,6 +57,7 @@ class Virality(object):
 
     def get_virality(self, html):
         title = self.get_title(html)
+        print('Article title: ', title)
         
         if self.debug:
             print(title)

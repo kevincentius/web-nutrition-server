@@ -1,9 +1,9 @@
 
 from newspaper import Article
 from textstat.textstat import textstat
-from server.readability import Readability
-from server.virality import Virality
-from server.stopwatch import Stopwatch
+from wnserver.readability import Readability
+from wnserver.virality import Virality
+from wnserver.stopwatch import Stopwatch
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 import traceback
@@ -15,6 +15,7 @@ class Analyzer(object):
     def __init__(self):
         self.virality = Virality()
         self.readability = Readability()
+        self.analyze_count = 0
 
     def call(self, func, *args):
         try:
@@ -30,8 +31,10 @@ class Analyzer(object):
             return 0
 
     def analyze(self, url):
+        self.analyze_count += 1
         if self.debug:
-            stopwatch = Stopwatch('analyze')
+            print('Stopwatch analyze ' + str(self.analyze_count) + ': ' + url)
+            stopwatch = Stopwatch('analyze ' + str(self.analyze_count))
         
         article = Article(url)
         

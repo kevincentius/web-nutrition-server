@@ -3,7 +3,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 from urllib.parse import urlparse, parse_qs
-from server.analyzer import Analyzer
+from wnserver.analyzer import Analyzer
 
 
 # HTTPRequestHandler class
@@ -58,13 +58,13 @@ class RestServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes(json.dumps(response), "utf8"))
         
 def run():
-    print('starting server...')
+    print('starting wnserver...')
     
     # Server settings
-    # Choose port 8080, for port 80, which is normally used for a http server, you need root access
+    # Choose port 8080, for port 80, which is normally used for a http wnserver, you need root access
     server_address = ('localhost', 8081)
     httpd = HTTPServer(server_address, RestServer)
-    print('running server...')
+    print('running wnserver...')
     httpd.serve_forever()
  
  
