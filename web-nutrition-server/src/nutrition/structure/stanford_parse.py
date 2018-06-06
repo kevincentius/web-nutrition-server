@@ -48,7 +48,7 @@ def process_stanford(data_set, restart=False):
         print('%i, %i%% %.2f seconds (%.0f total))' % (counter.count-1, 100*counter.count/data_set.data['count'], time.time() - doc_start, time.time() - start))
 
 if __name__ == '__main__':
-    process_stanford(DataSet('cepp'), restart=True)
+    process_stanford(DataSet('core-standard'), restart=True)
     
     
     

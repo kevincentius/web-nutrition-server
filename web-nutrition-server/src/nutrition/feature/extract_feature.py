@@ -51,10 +51,6 @@ def process_feature(data_set, restart=False):
         
     counter.commit()
 
+
 if __name__ == '__main__':
-<<<<<<< Upstream, based on origin/master
-    FeatureExtractor().process_data_set(DataSet('cepp'))
-=======
     process_feature(DataSet('cepp'), restart=True)
->>>>>>> e07827e use all tags
-    
