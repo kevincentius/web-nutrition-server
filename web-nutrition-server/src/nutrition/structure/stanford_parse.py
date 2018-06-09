@@ -20,7 +20,7 @@ def process_stanford(data_set, restart=False):
     
     # prepare to use Stanford parser
     nlp = StanfordCoreNLP(STANFORD_SERVER)
-    
+
     start = time.time()
     while counter.count < data_set.data['count']:
         doc_start = time.time()

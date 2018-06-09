@@ -37,16 +37,14 @@ def find_ngrams(input_list, n):
 # Extracting meaningful bigrams like United States Jon peter....
 def meanigful_bigrams(bgram):
     bigrams = []
-    for j in bgram:
-        # print(j)
-        try:
-            if tag(j[0])[0][1] == 'NNP' and tag(j[1])[0][1] == 'NNP' or tag(j[0])[0][1] == 'JJ' and tag(j[1])[0][
-                1] == 'NNP' or tag(j[0])[0][1] == 'JJ' and tag(j[1])[0][1] == 'NN' or tag(j[0])[0][1] == 'NN' and \
-                    tag(j[1])[0][1] == 'NNP' or tag(j[0])[0][1] == 'NNP' and tag(j[1])[0][1] == 'NN' or tag(j[0])[0][
-                1] == 'NN' and tag(j[1])[0][1] == 'NN':
-                bigrams.append(' '.join(j))
-        except:
-            pass
+
+    # for j in bgram:
+    #     tag1 = tag(j[0])[0][1]
+    #     tag2 = tag(j[1])[0][1]
+    #
+    #     if tag1 in ['NNP', 'NN', 'JJ'] and tag2 in ['NNP', 'NN']:
+    #         bigrams.append(' '.join(j))
+
     return bigrams
 
 
@@ -69,8 +67,7 @@ def difficult_words(word_tokens):
     #    word_tokens_flat = [word for tok in word_tokens for word in tok]
     word_freq = FreqDist(word_tokens_flat)
     all_words = word_freq.keys()
-    print('--------All words-----')
-    print(all_words)
+
     for word in all_words:
         if word_freq[word] <= 2 and len(word) >= 4:
             difficult_words_article.append(word)
@@ -116,8 +113,6 @@ def ttr(corpus):
 
 # type token ratios calcuations
 def ttr_pos_entities(pos_words, all_words):
-    print('pos', pos_words)
-    print('all', all_words)
     n = len(all_words)
     t = len(pos_words)
     if n > 0 and t > 0:
@@ -191,7 +186,6 @@ def ttr_pos(corpus_tagged):
                len(adverbs), len(adverbs_comp), len(adverbs_part), len(adverbs_sup),
                len(verb_3), len(verb_n3), len(verb_gerund), len(verb_past), len(verb_pastp),
                len(pronouns), len(poss_pronoun)]
-    print(all_len)
 
     ttr_proper_nouns = ttr_pos_entities(proper_nouns, nouns)
     ttr_modal_verbs = ttr_pos_entities(modals, verbs)
@@ -274,7 +268,6 @@ def ttr_pos(corpus_tagged):
         scores.append(ttr_possive_p)
 
     scores.remove(scores[0])
-    print(scores)
 
     return scores
 
@@ -288,6 +281,7 @@ def extract_lexical_features(sentences):
     cleaned_sentences = [fix(sentence) for sentence in sentences]
     #    cleaned_sentences = [tn.expand_contractions(sentence) for sentence in sentences]
     # pos tagging the sentences
+
     tagged_sentences = [tag(cleaned_sent) for cleaned_sent in cleaned_sentences]
     cleaned_sent_tokens = [word_tokenize(cleaned_sent) for cleaned_sent in cleaned_sentences]
     #print('------cleaned_sent_tokens------')
@@ -410,7 +404,6 @@ def extract_lexical_features(sentences):
     number_of_tokens_per_corpus = sum([len(tok) for tok in cleaned_sent_tokens])
 
     complex_tokens_len = [len(n) for n in complex_tokens]
-    print('ctl:', complex_tokens_len)
     complex_tokens_per_sent = [float(complex_tokens_len[i]) / len(sent_tokens_uncleaned[i])
                                for i in range(len(sentences))]
 
@@ -481,7 +474,6 @@ def extract_lexical_features(sentences):
     ttr_corpus = ttr(sentences)
     ttr_corpus_tagged = ttr_pos(tagged_sentences)
     ttr_corpus.extend(ttr_corpus_tagged)
-    print(ttr_corpus)
 
     difficult_words_article = difficult_words(cleaned_sent_tokens)
 
@@ -495,118 +487,6 @@ def extract_lexical_features(sentences):
     ttr_corpus.extend(scores)
 
     return ttr_corpus
-
-# cleaned_sent = tn.expand_contractions(sentence)
-# tagged_sent = tag(cleaned_sent)
-# cleaned_sent_tokens = tn.tokenize_text(cleaned_sent)
-# cleaned_sent_stop_words_removed = tn.remove_stopwords(cleaned_sent_tokens)
-# sent_tokens = tn.tokenize_text(sentence)
-
-# finding number of words in a sentence
-# number_tokens = float(len(cleaned_sent_stop_words_removed))/len(sent_tokens)
-#
-#
-## POS tokens
-# nouns_tokens =[]
-# verb_all_tokens = []
-# adverb_tokens = []
-# modal_tokens = []
-# verb_tokens = []
-# determiner_tokens = []
-# pronoun_tokens = []
-# predet_tokens = []
-# adjective_tokens = []
-# Foriegn_tokens = []
-##blob = TextBlob(sentence)
-##noun_phrases = blob.noun_phrases[0]
-#
-# for word,tags in tagged_sent:
-#    # Nouns
-#    if tags.startswith("NN"):
-#        if word not in nouns_tokens:
-#            nouns_tokens.append(word)
-#    # all verbs
-#    if tags.startswith("V") or tags.startswith("R") or tags.startswith("M"):
-#        if word not in verb_all_tokens:
-#            verb_all_tokens.append(word)
-#    # adverbs
-#    if tags.startswith("R"):
-#        if word not in adverb_tokens:
-#            adverb_tokens.append(word)
-#    # Modal verbs
-#    if tags.startswith("M"):
-#        if word not in modal_tokens:
-#            modal_tokens.append(word)
-#    # verbs
-#    if tags.startswith("V"):
-#        if word not in verb_tokens:
-#            verb_tokens.append(word)
-#    # determiners
-#    if tags.startswith("D"):
-#        if word not in determiner_tokens:
-#            determiner_tokens.append(word)
-#    # pronouns
-#    if tags.startswith("PRP"):
-#        if word not in pronoun_tokens:
-#            pronoun_tokens.append(word)
-#    # predeterminers
-#    if tags.startswith("PDT"):
-#        if word not in predet_tokens:
-#            predet_tokens.append(word)
-#    # adjectives
-#    if tags.startswith("J"):
-#        if word not in adjective_tokens:
-#            adjective_tokens.append(word)
-#    # Foriegn Tokens
-#    if tags.startswith("F"):
-#        if word not in Foriegn_tokens:
-#            Foriegn_tokens.append(word)
-#
-# stopword_list = stopwords.words('english')
-# stopword_list = [word for word in stopword_list if word not in determiner_tokens]
-# function_words = [word for word in cleaned_sent_tokens if word in stopword_list]
-# function_words = set(function_words)
-# num_noun_tokens = float(len(nouns_tokens))/len(sent_tokens)
-# num_all_verb_tokens = float(len(verb_all_tokens))/len(sent_tokens)
-# num_verb_tokens = float(len(verb_tokens))/len(sent_tokens)
-# num_adverb_tokens = float(len(adverb_tokens))/len(sent_tokens)
-# num_modal_verb_tokens = float(len(modal_tokens))/len(sent_tokens)
-# num_adjective_tokens = float(len(adjective_tokens))/len(sent_tokens)
-# num_determiner_tokens = float(len(determiner_tokens))/len(sent_tokens)
-# num_pre_det_tokens = float(len(predet_tokens))/len(sent_tokens)
-# num_foriegn_tokens = float(len(Foriegn_tokens))/len(sent_tokens)
-# num_function_words = float(len(function_words))/len(sent_tokens)
-
-
-# bigrams
-#        bigrams = []
-#        for sent in tokens:
-#            bigrams.append(find_ngrams(sent,2))
-#        #bigrams = find_ngrams(words[0],2)
-#
-#        for i in bigrams:
-#            temp = []
-#            for j in i:
-#                if j[0].tag_ == 'NNP' and j[1].tag_ == 'NNP' or j[0].tag_ == 'JJ'and j[1].tag_ == 'NNP' or j[0].tag_ == 'JJ'and j[1].tag_ == 'NN' or j[0].tag_ == 'NN'and j[1].tag_ == 'NNP' or j[0].tag_ == 'NNP'and j[1].tag_ == 'NN' or j[0].tag_ == 'NN'and j[1].tag_ == 'NN':
-#                    temp.append(j)
-#            meaningful_bigrams.append(temp)
-
-#    else:
-#        complex_words.append((filter(lambda z: len(z)>4, tokens),float(len(filter(lambda z: len(z)>4, tokens)))/len(tokens)))
-# bigrams
-#        bigrams = []
-#        bigrams.append(find_ngrams(sent,2))
-#        #bigrams = find_ngrams(words[0],2)
-#
-#        for i in bigrams:
-#            temp = []
-#            for j in i:
-#                if j[0].tag_ == 'NNP' and j[1].tag_ == 'NNP' or j[0].tag_ == 'JJ'and j[1].tag_ == 'NNP' or j[0].tag_ == 'JJ'and j[1].tag_ == 'NN' or j[0].tag_ == 'NN'and j[1].tag_ == 'NNP' or j[0].tag_ == 'NNP'and j[1].tag_ == 'NN' or j[0].tag_ == 'NN'and j[1].tag_ == 'NN':
-#                    temp.append(j)
-#            meaningful_bigrams.append(temp)
-
-
-
 
 
 if __name__ == '__main__':
