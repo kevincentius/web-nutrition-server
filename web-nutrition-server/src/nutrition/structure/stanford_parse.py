@@ -14,13 +14,13 @@ import sys
 from nutrition.structure.environment import STANFORD_SERVER
 
 
-def parse(data_set):
+def process_stanford(data_set, restart=False):
     # load count, i.e. how many documents have been parsed successfully
-    counter = Counter(data_set.stanford_path)
+    counter = Counter(data_set.stanford_path, restart=restart)
     
     # prepare to use Stanford parser
     nlp = StanfordCoreNLP(STANFORD_SERVER)
-    
+
     start = time.time()
     while counter.count < data_set.data['count']:
         doc_start = time.time()
@@ -30,7 +30,7 @@ def parse(data_set):
         
         # call stanford annotate api
         annotation = nlp.annotate(text, properties={
-            'annotators': 'tokenize,ssplit,pos,depparse,parse',
+            'annotators': 'lemma,parse',
             'outputFormat': 'json'
         })
         
@@ -48,8 +48,7 @@ def parse(data_set):
         print('%i, %i%% %.2f seconds (%.0f total))' % (counter.count-1, 100*counter.count/data_set.data['count'], time.time() - doc_start, time.time() - start))
 
 if __name__ == '__main__':
-    data_set = DataSet('newsela')
-    parse(data_set)
+    process_stanford(DataSet('core-standard'), restart=True)
     
     
     
