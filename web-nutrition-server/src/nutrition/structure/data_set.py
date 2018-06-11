@@ -1,4 +1,7 @@
 
+# This class provides access to a data set's folder content, and is meant to keep all
+# data sets in the same structure and avoid data-set-specific code.
+
 import os
 from shutil import copyfile
 
@@ -74,7 +77,7 @@ class DataSet(object):
         with open('{}/{}'.format(self.stanford_path, text_id), 'rb') as file:
             return pickle.load(file)
 
-    # each row in the matrix represents one training data
+    # each row contains all features and the label as the last column
     def save_feature_matrix(self, mat):
         with open('{}/features.csv'.format(self.feature_path), 'wb') as file:
             np.savetxt(file, mat)
@@ -86,6 +89,7 @@ class DataSet(object):
             with open(path, 'rb') as file:
                 return np.loadtxt(file)
 
+    # returns features array (2D, each row is a training example) and labels array
     def load_training_data(self):
         feature_matrix = self.load_feature_matrix()
         
@@ -94,6 +98,17 @@ class DataSet(object):
         y = feature_matrix[:, num_features]
         
         return x, y
+
+    # saves a trained model in the data set's folder. See also load_model(...)
+    def save_model(self, model, name):
+        filename = '{}/{}'.format(self.model_path, name)
+        with open(filename, 'wb') as file:
+            pickle.dump(model, file)
+
+    def load_model(self, name):
+        filename = '{}/{}'.format(self.model_path, name)
+        with open(filename, 'rb') as file:
+            return pickle.load(file)
 
     def print_info(self):
         if hasattr(self, 'data'):

@@ -8,6 +8,7 @@ import time
 from concurrent.futures.thread import ThreadPoolExecutor
 import traceback
 
+
 class Analyzer(object):
 
     debug = True
@@ -44,16 +45,20 @@ class Analyzer(object):
         
         article.download()
         if article.download_state == 0: #ArticleDownloadState.NOT_STARTED is 0
+            if self.debug:
+                print('Failed to retrieve from ' + url)
             return {'error': 'Failed to retrieve from ' + url}
-        
+
         # extract the main text content of the page
         if self.debug:
             stopwatch.lap('newspaper3k parsing')
-            
+
         article.parse()
         if not article.text:
+            if self.debug:
+                print('newspaper3k parse failed on ' + url)
             return {'error': 'Failed to process document'}
-        
+
         if self.debug:
             print(article.text.encode("utf-8"))
                 
@@ -67,7 +72,7 @@ class Analyzer(object):
 
         # read the results (error robustness: error in a label must not stop other labels from being delivered)
         readability = f_readability.result()
-        if (type(f_virality.result()) is list):
+        if type(f_virality.result()) is list:
             [virality, tweets_per_hour] = f_virality.result()
         else:
             print('error analyzing virality: future returned {}'.format(f_virality.result()))
@@ -125,5 +130,5 @@ class Analyzer(object):
 
 if __name__ == "__main__":
     analyzer = Analyzer()
-    analyzer.analyze('https%3A%2F%2Fgithub.com%2Fcodelucas%2Fnewspaper%2Fissues%2F357')
+    analyzer.analyze('https://en.wikipedia.org/wiki/Chess')
     #analyzer.analyze('http://money.cnn.com/2018/04/18/media/president-trump-media-protectors/index.html')
