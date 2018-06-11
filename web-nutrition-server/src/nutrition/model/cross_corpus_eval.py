@@ -1,23 +1,10 @@
-
-from sklearn import linear_model
-from sklearn.linear_model import Ridge, Lasso
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection._validation import cross_val_score
 
 import matplotlib.pyplot as plt
-from sklearn.svm import SVR, SVC
+from sklearn.svm import SVC
 
 from nutrition.structure.data_set import DataSet
-import pickle
-from nutrition.structure.environment import ROOT_FOLDER
 
-from sklearn.feature_selection import RFE
-from pprint import pprint
-from sklearn.linear_model.base import LinearRegression
-
-import numpy as np
-import sys
-from nutrition.feature.stanford_feature import get_feature_names
 from math import sqrt
 
 def eval_plot(model, data_set, cc_set, features):

@@ -16,17 +16,6 @@ class Readability(object):
         # prepare to use Stanford parser
         self.nlp = StanfordCoreNLP(STANFORD_SERVER)
 
-        java_path = r'C:/Program Files/Java/jre1.8.0_171'
-        os.environ['JAVAHOME'] = java_path
-
-        self.scp = StanfordParser(
-            path_to_jar=STANFORD_FOLDER + '/stanford-corenlp-3.9.1.jar',
-            path_to_models_jar=STANFORD_FOLDER + '/asdf.jar')
-
-        self.sdp = StanfordDependencyParser(
-            path_to_jar=STANFORD_FOLDER + '/stanford-corenlp-3.9.1.jar',
-            path_to_models_jar=STANFORD_FOLDER + '/asdf.jar')
-
         # load trained model
         self.model = DataSet('cepp').load_model('random-forest')
 
@@ -35,21 +24,23 @@ class Readability(object):
             print('text length: {} characters'.format(len(text)))
         
         # call stanford annotate api
+        print('Calling Stanford API...')
         annotation = self.nlp.annotate(text[:1000], properties={
-            'annotators': 'tokenize,ssplit,pos,depparse,parse'
+            'annotators': 'lemma,parse',
+            'outputFormat': 'json'
         })
+        print('Calling Stanford API done.')
 
-        print('test')
         if type(annotation) is str:
             print('Error returned by stanford parser:', annotation)
             return 0
 
         print('annotation', annotation)
 
-        x = extract_features(text, self.scp, self.sdp)
+        x = extract_features(text, annotation)
         
         y = self.model.predict([x])[0]
-        return 100 - y * 25
+        return 100 - y * 20
 
 
 if __name__ == '__main__':

@@ -1,21 +1,18 @@
-import os
 import re
 import time
 from itertools import chain
 
 import numpy as np
 from nltk import sent_tokenize
-from nltk.parse.stanford import StanfordParser, StanfordDependencyParser
 
-from nutrition.readability.lexical_feature_extraction import extract_lexical_features
-from nutrition.readability.syntactical_feature_extraction import extract_syntactical_features
+from nutrition.readability.stanford_feature import get_syntactic_features
+from nutrition.readability.lexical_feature import extract_lexical_features
 from nutrition.readability.trad_score import all_trad_scores
 from nutrition.structure.counter import Counter
 from nutrition.structure.data_set import DataSet
-from nutrition.structure.environment import STANFORD_FOLDER
 
 
-def extract_features(text, scp, sdp):
+def extract_features(text, annotation):
     text = re.sub(r"\s?\(.*?\)", r"", text)
 
     lines = text.split('\n')
@@ -27,25 +24,13 @@ def extract_features(text, scp, sdp):
 
     trad_scores = all_trad_scores(text)
     lexical_features = extract_lexical_features(sentences)
-    syntactical_features = extract_syntactical_features(sentences, scp, sdp)
+    syntactical_features = get_syntactic_features(annotation)
 
     all_features = list(chain.from_iterable([trad_scores, lexical_features, syntactical_features]))
     return all_features
 
 
 def process_feature(data_set, restart=False):
-    java_path = r'C:/Program Files/Java/jre1.8.0_171'
-    os.environ['JAVAHOME'] = java_path
-
-    scp = StanfordParser(
-        path_to_jar=STANFORD_FOLDER + '/stanford-corenlp-3.9.1.jar',
-        path_to_models_jar=STANFORD_FOLDER + '/stanford-corenlp-3.9.1-models.jar')
-
-    sdp = StanfordDependencyParser(
-        path_to_jar=STANFORD_FOLDER + '/stanford-corenlp-3.9.1.jar',
-        path_to_models_jar=STANFORD_FOLDER + '/stanford-corenlp-3.9.1-models.jar')
-
-
     if restart:
         feature_matrix = None
     else:
@@ -69,9 +54,10 @@ def process_feature(data_set, restart=False):
         # read raw text and parse tree
         text = data_set.get_text(counter.count)
         label = data_set.data['labels'][counter.count]
+        annotation = data_set.load_stanford_annotation(counter.count)
 
         # extract features into a row array
-        row = extract_features(text, scp, sdp)
+        row = extract_features(text, annotation)
         row.append(label)
 
         # initialize feature matrix if it is None

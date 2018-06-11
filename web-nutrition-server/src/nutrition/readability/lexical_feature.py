@@ -322,7 +322,7 @@ def extract_lexical_features(sentences):
     Foriegn_tokens = []
     function_words = []
 
-    for sent in stopword_list:
+    for sent in sentences:
         temp = [words for words in sent if words in stopword_list]
         function_words.append(temp)
 

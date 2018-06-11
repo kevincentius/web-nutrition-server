@@ -1,20 +1,12 @@
-
-from sklearn import linear_model
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection._validation import cross_val_score
 
 import matplotlib.pyplot as plt
 from nutrition.structure.data_set import DataSet
-import pickle
-from nutrition.structure.environment import ROOT_FOLDER
 
-from sklearn.feature_selection import RFE
-from pprint import pprint
 from sklearn.linear_model.base import LinearRegression
 
 import numpy as np
-import sys
-from nutrition.feature.stanford_feature import get_feature_names
+from nutrition.readability.stanford_feature import get_feature_names
 
 
 def get_error(x, y):
