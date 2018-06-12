@@ -38,9 +38,11 @@ def find_ngrams(input_list, n):
 def meanigful_bigrams(bgram):
     bigrams = []
 
-    # for j in bgram:
-    #     tag1 = tag(j[0])[0][1]
-    #     tag2 = tag(j[1])[0][1]
+    for j in bgram:
+        tag1 = tag(j[0])[0][1]
+        tag2 = tag(j[1])[0][1]
+        if tag1 in ['NNP', 'JJ', 'NN'] and tag2 in ['NN', 'NNP']:
+            bigrams.append(' '.join(j))
     #
     #     if tag1 in ['NNP', 'NN', 'JJ'] and tag2 in ['NNP', 'NN']:
     #         bigrams.append(' '.join(j))

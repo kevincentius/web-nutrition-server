@@ -1,4 +1,12 @@
 
-ROOT_FOLDER = 'D:/git/web-nutrition-server/web-nutrition-server/src/data'
+# SRC_FOLDER: path to the 'src' folder, needed to load models.
+SRC_FOLDER = 'D:/Projects/PyCharm/web-nutrition-server/web-nutrition-server/src'
+
+# URL to the Stanford Core NLP Server
 STANFORD_SERVER = 'http://localhost:9000'
-STANFORD_FOLDER = 'D:/master project/stanford-corenlp-full-2018-02-27'
+
+
+# ROOT_FOLDER: path to the folder that contains data sets and intermediate results
+#   It is recommended to put this folder OUTSIDE the IDE's workspace as it may slow down the IDE.
+#   This is not required to start the web nutrition server.
+ROOT_FOLDER = 'D:/git/web-nutrition-server/web-nutrition-server/src/data'

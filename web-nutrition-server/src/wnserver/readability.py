@@ -1,11 +1,12 @@
 import os
 
+import pickle
 from nltk.parse.stanford import StanfordParser, StanfordDependencyParser
 from pycorenlp.corenlp import StanfordCoreNLP
 
 from nutrition.readability.feature_extraction import extract_features
 from nutrition.structure.data_set import DataSet
-from nutrition.structure.environment import STANFORD_SERVER, STANFORD_FOLDER
+from nutrition.structure.environment import STANFORD_SERVER, SRC_FOLDER
 
 
 class Readability(object):
@@ -17,7 +18,8 @@ class Readability(object):
         self.nlp = StanfordCoreNLP(STANFORD_SERVER)
 
         # load trained model
-        self.model = DataSet('cepp').load_model('random-forest')
+        with open(SRC_FOLDER + '/models/readability', 'rb') as file:
+            self.model = pickle.load(file)  # DataSet('cepp').load_model('random-forest')
 
     def get_readability(self, text):
         if self.debug:

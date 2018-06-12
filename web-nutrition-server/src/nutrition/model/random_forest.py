@@ -63,16 +63,17 @@ def cross_corpus(train_set_name, test_set_name):
 
 if __name__ == '__main__':
     # which data set to use
-    train_on = 'cepp'
-    test_on = 'core-standard'
+    train_on = 'core-standard'
+    test_on = 'cepp'
+    num_trials = 10
 
     # evaluate model
     total_acc = 0
-    for i in range(0, 100):
+    for i in range(0, num_trials):
         total_acc += cross_validation(train_on)
-    print('average cross validation accuracy:', total_acc/25)
+    print('average cross validation accuracy:', total_acc/num_trials)
 
     model = cross_corpus(train_on, test_on)
 
     # save fully trained model
-    DataSet(train_on).save_model(model, 'random-forest')
+    #DataSet(train_on).save_model(model, 'random-forest')
