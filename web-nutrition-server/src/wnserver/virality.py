@@ -3,33 +3,35 @@ import tweepy
 from newspaper import Article
 import datetime
 from lxml.html import document_fromstring
+from lxml.etree import tostring
+from itertools import chain
+
+from nutrition.structure.environment import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_TOKEN, \
+    TWITTER_ACCESS_TOKEN_SECRET
+
 
 class Virality(object):
 
     debug = False
 
     def __init__(self):
-        consumer_key = "RvBkfoQWrJIAWrG1Ih6VRDRB1"
-        consumer_secret = "t8kjE5wptu2ktPKs3ui254acK2IbJPcgkKw31hAnweJsK85oMI"
-        access_token = "959735476415549440-bhFGGPTWH6Z5W7ZKPEwadmXKPL4eG5M"
-        access_token_secret = "3y2YgvOvUrrsT2AuSXy4FxpkxJ3xl4G5n9OaTDfxWkOVN"
-
         # Creating the authentication object
-        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
 
         # Setting your access token and secret
-        auth.set_access_token(access_token, access_token_secret)
+        auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
 
         # Creating the api object
         self.api = tweepy.API(auth)
 
     def get_title(self, html):
         document = document_fromstring(html)
-        
+
         for i in range(1, 5):
             element = document.find('.//h' + str(i))
+
             if element is not None:
-                return element.text
+                return ''.join(element.itertext()).strip()
             
         if self.debug:
             print('Cannot find title: h tag not found')
@@ -61,9 +63,14 @@ class Virality(object):
         
         if self.debug:
             print(title)
-        
-        tweets_per_hour = self.get_tweets_per_hour(title)
-        virality = 100 - 1000 / (tweets_per_hour + 10)
+
+        if title:
+            tweets_per_hour = self.get_tweets_per_hour(title)
+            virality = 100 - 1000 / (tweets_per_hour + 10)
+        else:
+            print('Failed to retrieve title')
+            tweets_per_hour = 0
+            virality = 0
 
         if self.debug:
             print('title = ' + title)
@@ -74,7 +81,7 @@ class Virality(object):
 
 if __name__ == '__main__':
     virality = Virality()
-    article = Article('https://www.wsj.com/articles/trump-to-demand-investigation-into-whether-fbi-infiltrated-his-campaign-1526849292')
+    article = Article('https://www.politico.com/story/2018/06/12/navarro-comments-justin-trudeau-mistake-639075')
 
     print('downloading')
 
