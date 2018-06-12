@@ -63,9 +63,9 @@ def cross_corpus(train_set_name, test_set_name):
 
 if __name__ == '__main__':
     # which data set to use
-    train_on = 'core-standard'
+    train_on = 'cepp'
     test_on = 'cepp'
-    num_trials = 10
+    num_trials = 100
 
     # evaluate model
     total_acc = 0
