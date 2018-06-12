@@ -57,14 +57,12 @@ def word_complexity(tokens):
 def ttr_pos_entities(pos_words, all_words):
     n = len(all_words)
     t = len(pos_words)
-    if n > 0 and t > 0:
-        nttr = float(t) / n
-        rttr = float(t) / (n ** 0.5)
-        cttr = float(t) / ((2 * n) ** 0.5)
-        mass = (math.log(n) - math.log(t)) / math.log(n) ** 2
-        return [nttr, rttr, cttr, mass]
-    else:
-        return [0, 0, 0, 0]
+
+    nttr = float(t) / n
+    rttr = float(t) / (n ** 0.5)
+    cttr = float(t) / ((2 * n) ** 0.5)
+    mass = (math.log(n+1) - math.log(t+1)) / math.log(n+1) ** 2
+    return [nttr, rttr, cttr, mass]
 
 
 # type token ratios for different POS tags

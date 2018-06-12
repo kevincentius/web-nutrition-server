@@ -76,4 +76,4 @@ if __name__ == '__main__':
     model = cross_corpus(train_on, test_on)
 
     # save fully trained model
-    #DataSet(train_on).save_model(model, 'random-forest')
+    DataSet(train_on).save_model(model, 'random-forest')
