@@ -23,7 +23,7 @@ def extract_features(text, annotation):
     sentences = list(chain.from_iterable(line_sentences))
 
     trad_scores = all_trad_scores(text)
-    lexical_features = extract_lexical_features(sentences)
+    lexical_features = extract_lexical_features(sentences, annotation)
     syntactical_features = get_syntactic_features(annotation)
 
     all_features = list(chain.from_iterable([trad_scores, lexical_features, syntactical_features]))
@@ -76,4 +76,4 @@ def process_feature(data_set, restart=False):
 
 
 if __name__ == '__main__':
-    process_feature(DataSet('core-standard'), restart=True)
+    process_feature(DataSet('cepp'), restart=True)

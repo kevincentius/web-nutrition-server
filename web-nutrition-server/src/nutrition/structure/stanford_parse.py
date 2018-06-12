@@ -6,6 +6,7 @@ This is a preparation step for feature extraction that takes a long time,
 '''
 import time
 
+from contractions import fix
 from pycorenlp.corenlp import StanfordCoreNLP
 
 from nutrition.structure.data_set import DataSet
@@ -26,7 +27,7 @@ def process_stanford(data_set, restart=False):
         doc_start = time.time()
         
         # read file
-        text = data_set.get_text(counter.count)
+        text = fix(data_set.get_text(counter.count))
         
         # call stanford annotate api
         annotation = nlp.annotate(text, properties={
@@ -48,7 +49,7 @@ def process_stanford(data_set, restart=False):
         print('%i, %i%% %.2f seconds (%.0f total))' % (counter.count-1, 100*counter.count/data_set.data['count'], time.time() - doc_start, time.time() - start))
 
 if __name__ == '__main__':
-    process_stanford(DataSet('core-standard'), restart=True)
+    process_stanford(DataSet('cepp'), restart=True)
     
     
     

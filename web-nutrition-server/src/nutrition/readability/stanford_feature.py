@@ -1,11 +1,9 @@
 '''
 This script is for extracting features from a stanford parse tree.
 '''
-import pickle
+import math
 import numpy as np
-
 from nltk.tree import Tree
-import sys
 
 from nutrition.structure.data_set import DataSet
 
@@ -123,34 +121,6 @@ def count_nodes(terminal_count, non_terminal_count):
     return sum(terminal_count.values()) + sum(non_terminal_count.values())
 
 
-def get_feature_names():
-    phrase_tags = ['ADJP', 'ADVP', 'CONJP', 'FRAG', 'INTJ', 'LST', 'NAC', 'NP', 'NX', 'PP', 'PRN', 'PRT', 'QP',
-                   'RRC', 'UCP', 'VP', 'WHADJP', 'WHAVP', 'WHNP', 'WHPP', 'X']
-    word_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS',
-                 'PDT', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG',
-                 'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WP$', 'WRB']
-
-    features = []
-
-    for phrase_tag in phrase_tags:
-        features.append(phrase_tag + '/Tkn')
-        features.append(phrase_tag + '/Stc')
-
-    for word_tag in word_tags:
-        features.append(word_tag + '/Tkn')
-        features.append(word_tag + '/Stc')
-
-    features.append('non-terminal-nodes')
-    features.append('types/Tkn')
-    features.append('types/Stc')
-    features.append('token/Stc')
-    features.append('nodes/Stc')
-    features.append('nodes/Tkn')
-    features.append('avg-node-depth')
-    features.append('avg-word-length')
-    return features
-
-
 def get_dependency_tree_depth(annotation):
     dt_depths = []
     for sentence in annotation['sentences']:
@@ -182,22 +152,19 @@ def get_syntactic_features(annotation):
     type_count, token_count = count_types(annotation)
     node_count = count_nodes(terminal_count, non_terminal_count)
 
-    #phrase_tags = ['ADJP', 'ADVP', 'CONJP', 'FRAG', 'INTJ', 'LST', 'NAC', 'NP', 'NX', 'PP', 'PRN', 'PRT', 'QP',
-    #               'RRC', 'UCP', 'VP', 'WHADJP', 'WHAVP', 'WHNP', 'WHPP', 'X']
-    #word_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS',
-    #             'PDT', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG',
-    #             'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WP$', 'WRB']
+    tags = [
+        # clause
+        'S', 'SBAR', 'SBARQ', 'SINV', 'SQ',
 
-    tags = ['S', 'SBAR', 'SBARQ', 'SINV', 'SQ',
-        
-            'ADJP', 'ADVP', 'CONJP', 'FRAG', 'INTJ', 'LST', 'NAC', 'NP', 'NX', 'PP', 'PRN', 'PRT', 'QP',
-            'RRC', 'UCP', 'VP', 'WHADJP', 'WHAVP', 'WHNP', 'WHPP', 'X',
+        # phrase
+        'ADJP', 'ADVP', 'CONJP', 'FRAG', 'INTJ', 'LST', 'NAC', 'NP', 'NX', 'PP', 'PRN', 'PRT', 'QP',
+        'RRC', 'UCP', 'VP', 'WHADJP', 'WHAVP', 'WHNP', 'WHPP', 'X',
 
-            'CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS',
-            'PDT', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG',
-            'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WP$', 'WRB']
-
-    #tags = ['SBAR', 'NP', 'VP', 'ADJP', 'ADVP', 'PP']
+        # word
+        'CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS',
+        'PDT', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG',
+        'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WP$', 'WRB'
+    ]
 
     features = []
 
@@ -215,6 +182,9 @@ def get_syntactic_features(annotation):
 
         # type-token ratio
         type_count / token_count,
+        type_count / (token_count ** 0.5),
+        type_count / ((2 * token_count) ** 0.5),
+        (math.log(token_count) - math.log(type_count)) / math.log(token_count) ** 0.5,
         type_count / num_sentences,
 
         # tokens per sentence
@@ -250,4 +220,3 @@ if __name__ == '__main__':
 
     print(get_syntactic_features(annotation))
     print(len(get_syntactic_features(annotation)))
-    print(len(get_feature_names()))
