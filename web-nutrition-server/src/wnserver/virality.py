@@ -24,20 +24,6 @@ class Virality(object):
         # Creating the api object
         self.api = tweepy.API(auth)
 
-    def get_title(self, html):
-        document = document_fromstring(html)
-
-        for i in range(1, 5):
-            element = document.find('.//h' + str(i))
-
-            if element is not None:
-                return ''.join(element.itertext()).strip()
-            
-        if self.debug:
-            print('Cannot find title: h tag not found')
-            print('HTML:', html)
-        
-        return None;
 
     def get_tweets_per_hour(self, title):
         results = tweepy.Cursor(self.api.search, q=title).items(100)
@@ -57,10 +43,7 @@ class Virality(object):
             tweets_per_hour = 0
         return tweets_per_hour
 
-    def get_virality(self, html):
-        title = self.get_title(html)
-        print('Article title: ', title)
-        
+    def get_virality(self, title):
         if self.debug:
             print(title)
 

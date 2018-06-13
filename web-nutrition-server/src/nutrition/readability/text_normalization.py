@@ -11,7 +11,7 @@ import string
 from pprint import pprint
 from contractions import contractions_dict
 from nltk.corpus import wordnet as wn
-from pattern.text.en import tag
+from pattern3.text.en import tag
 #corpus = "The brown fox wasn't that quick and he couldn't win the race. Hey that's a great deal!, I just bought a phone for $199. @@You'll (learn) a **lot** in the book. Python is an amazing language!,@@."
 
 print('test')
