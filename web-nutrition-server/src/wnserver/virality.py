@@ -12,7 +12,7 @@ from nutrition.structure.environment import TWITTER_CONSUMER_KEY, TWITTER_CONSUM
 
 class Virality(object):
 
-    debug = False
+    debug = True
 
     def __init__(self):
         # Creating the authentication object
@@ -72,7 +72,8 @@ if __name__ == '__main__':
     if article.download_state == 0: #ArticleDownloadState.NOT_STARTED is 0
         print('Failed to retrieve')
 
-    score = virality.get_virality(article.html)
+    article.parse()
+    score = virality.get_virality(article.title)
 
     print('virality = ', score)
 
