@@ -89,7 +89,7 @@ if __name__ == '__main__':
     # which data set to use
     train_on = 'cepp'
     test_on = 'cepp'
-    num_trials = 100
+    num_trials = 1
 
     # evaluate model
     # leave_one_out_score('cepp')
