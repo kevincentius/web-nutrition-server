@@ -56,16 +56,13 @@ class RestServer(BaseHTTPRequestHandler):
         
         # Convert response into JSON and send
         self.wfile.write(bytes(json.dumps(response), "utf8"))
-        
-def run():
+
+
+def run(port):
     print('starting wnserver...')
     
     # Server settings
-    # Choose port 8080, for port 80, which is normally used for a http wnserver, you need root access
-    server_address = ('localhost', 8081)
+    server_address = ('localhost', port)
     httpd = HTTPServer(server_address, RestServer)
     print('running wnserver...')
     httpd.serve_forever()
- 
- 
-run()

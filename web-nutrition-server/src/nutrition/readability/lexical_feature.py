@@ -55,8 +55,8 @@ def word_complexity(tokens):
 
 # type token ratios calcuations
 def ttr_pos_entities(pos_words, all_words):
-    n = len(all_words)
-    t = len(pos_words)
+    n = len(all_words) + 1
+    t = len(pos_words) + 1
 
     nttr = float(t) / n
     rttr = float(t) / (n ** 0.5)

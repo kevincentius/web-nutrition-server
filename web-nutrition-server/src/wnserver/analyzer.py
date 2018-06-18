@@ -2,6 +2,7 @@
 from newspaper import Article
 from textstat.textstat import textstat
 from wnserver.readability import Readability
+from wnserver.sentiment_and_subjectivity import Sentiment
 from wnserver.virality import Virality
 from wnserver.stopwatch import Stopwatch
 import time
@@ -16,20 +17,26 @@ class Analyzer(object):
     def __init__(self):
         self.virality = Virality()
         self.readability = Readability()
+        self.sentiment = Sentiment()
         self.analyze_count = 0
 
     def call(self, func, *args):
-        try:
-            start_time = time.time()
-            
-            result = func(*args)
-            if self.debug:
-                print('{} returned {} in {:.2f} seconds'.format(func.__name__, result, time.time() - start_time))
+        start_time = time.time()
+
+        result = func(*args)
+        if self.debug:
+            print('{} returned {} in {:.2f} seconds'.format(func.__name__, result, time.time() - start_time))
+        return result
+
+    def get_result(self, future, name, default=None):
+        exc = future.exception()
+        if exc is None:
+            result = future.result()
             return result
-        except:
-            print('error when calling', func)
-            traceback.print_exc()
-            return 0
+        else:
+            if self.debug:
+                print(name, 'threw exception', exc)
+            return default
 
     def analyze(self, url):
         self.analyze_count += 1
@@ -61,7 +68,7 @@ class Analyzer(object):
 
         if self.debug:
             print(article.text.encode("utf-8"))
-                
+
         # start nutrition label analysis in parallel
         if self.debug:
             stopwatch.lap('analzying nutrition labels')
@@ -69,20 +76,16 @@ class Analyzer(object):
         with ThreadPoolExecutor(max_workers=5) as executor:
             f_readability = executor.submit(self.call, self.readability.get_readability, article.text)
             f_virality = executor.submit(self.call, self.virality.get_virality, article.title)
+            f_sentiment = executor.submit(self.call, self.sentiment.get_sentiment, article.text)
 
         # read the results (error robustness: error in a label must not stop other labels from being delivered)
-        readability = f_readability.result()
-        if type(f_virality.result()) is list:
-            [virality, tweets_per_hour] = f_virality.result()
-        else:
-            print('error analyzing virality: future returned {}'.format(f_virality.result()))
-            [virality, tweets_per_hour] = [0, 0]
+        readability = self.get_result(f_readability, 'readability', 0)
+        [virality, tweets_per_hour] = self.get_result(f_virality, 'virality', [0, 0])
+        [sentiment, subjectivity] = self.get_result(f_sentiment, 'sentiment', [0, 0])
 
         if self.debug:
             stopwatch.finish()
-            
-        flesch_reading_ease = textstat.flesch_reading_ease(article.text)
-        linsear_write_formula = textstat.linsear_write_formula(article.text)
+
         gunning_fog = textstat.gunning_fog(article.text)
         
         # readability + some mock data
@@ -102,17 +105,17 @@ class Analyzer(object):
                 "color": "#fc0"
             },
             {
-                "name": "flesch_reading_ease",
-                "display": "flesch reading ease: " + str(round(flesch_reading_ease)) + "%",
-                "value": flesch_reading_ease,
-                "percentage": flesch_reading_ease,
+                "name": "sentiment",
+                "display": "sentiment: " + str(round((sentiment + 1) * 50)) + "%",
+                "value": (sentiment + 1) * 50,
+                "percentage": (sentiment + 1) * 50,
                 "color": "#0f0"
             },
             {
-                "name": "linsear_write_formula",
-                "display": "linsear write formula: " + str(round(linsear_write_formula)),
-                "value": linsear_write_formula,
-                "percentage": 100 - linsear_write_formula * 100 / 20,
+                "name": "subjectivity",
+                "display": "subjectivity: " + str(round(subjectivity * 100)) + "%",
+                "value": subjectivity * 100,
+                "percentage": subjectivity * 100,
                 "color": "#0cc"
             },
             {
@@ -128,7 +131,8 @@ class Analyzer(object):
         for attr in dir(obj):
             print("obj.%s = %r" % (attr, getattr(obj, attr)))
 
+
 if __name__ == "__main__":
     analyzer = Analyzer()
-    analyzer.analyze('https://en.wikipedia.org/wiki/Chess')
+    print(analyzer.analyze('https://en.wikipedia.org/wiki/Chess'))
     #analyzer.analyze('http://money.cnn.com/2018/04/18/media/president-trump-media-protectors/index.html')

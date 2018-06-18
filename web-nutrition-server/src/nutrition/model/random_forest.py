@@ -45,6 +45,30 @@ def cross_validation(data_set_name):
     return accuracy
 
 
+def leave_one_out_score(data_set_name):
+    # open data set
+    data_set = DataSet(data_set_name)
+    x, y = data_set.load_training_data();
+
+    correct_count = 0
+
+    for i in range(len(y)):
+        x_train = np.delete(x, i, axis=0)
+        y_train = np.delete(y, i)
+        x_test = [x[i]]
+        y_test = [y[i]]
+
+        # train model
+        model = train_model(x_train, y_train)
+        if model.predict(x_test)[0] == y_test:
+            correct_count += 1
+            print(i, 'correct,', correct_count / (i+1))
+        else:
+            print(i, 'wrong,', correct_count / (i+1))
+
+    print('accuracy:', correct_count / len(y))
+
+
 def cross_corpus(train_set_name, test_set_name):
     # open data set and train model
     train_set = DataSet(train_set_name)
@@ -68,12 +92,16 @@ if __name__ == '__main__':
     num_trials = 100
 
     # evaluate model
+    # leave_one_out_score('cepp')
+
     total_acc = 0
+    accs = []
     for i in range(0, num_trials):
-        total_acc += cross_validation(train_on)
-    print('average cross validation accuracy:', total_acc/num_trials)
+        accs.append(cross_validation(train_on))
+    print('accs:' + accs)
+    print('average cross validation accuracy:', sum(accs)/num_trials)
 
     model = cross_corpus(train_on, test_on)
 
     # save fully trained model
-    DataSet(train_on).save_model(model, 'random-forest')
+    # DataSet(train_on).save_model(model, 'random-forest')
