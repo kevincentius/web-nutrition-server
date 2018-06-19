@@ -112,10 +112,10 @@ class Analyzer(object):
                 "color": "#0f0"
             },
             {
-                "name": "subjectivity",
-                "display": "subjectivity: " + str(round(subjectivity * 100)) + "%",
-                "value": subjectivity * 100,
-                "percentage": subjectivity * 100,
+                "name": "objectivity",
+                "display": "objectivity: " + str(round((1-subjectivity) * 100)) + "%",
+                "value": (1-subjectivity) * 100,
+                "percentage": (1-subjectivity) * 100,
                 "color": "#0cc"
             },
             {
