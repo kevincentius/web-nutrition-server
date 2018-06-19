@@ -66,3 +66,7 @@ def run(port):
     httpd = HTTPServer(server_address, RestServer)
     print('running wnserver...')
     httpd.serve_forever()
+
+
+if __name__ == "__main__":
+    run(8081)
