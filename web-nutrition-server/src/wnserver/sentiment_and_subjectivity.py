@@ -55,8 +55,11 @@ class Sentiment(object):
                 negative_score += sentiment_result
 
         #print(neutral_count, positive_count, negative_count)
-        print((positive_score/sents_count)**0.2, (abs(negative_score)/sents_count)**0.2)
-        return sentiment(" ".join(sents))[0], sentiment(" ".join(sents))[1]
+        print((positive_score/sents_count)**0.4, (abs(negative_score)/sents_count)**0.4)
+        avg_positive_score = positive_score / sents_count
+        avg_negative_score = abs(negative_score) / sents_count
+        overall_score = avg_positive_score + avg_negative_score
+        return [overall_score, avg_positive_score, avg_negative_score]
 
 
 if __name__ == "__main__":

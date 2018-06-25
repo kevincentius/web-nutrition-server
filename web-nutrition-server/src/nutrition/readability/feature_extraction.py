@@ -43,7 +43,7 @@ def process_feature(data_set, restart=False):
 
     # load count, i.e. how many documents have been parsed successfully
     counter = Counter(data_set.feature_path,
-                      commit_interval=50,
+                      commit_interval=10,
                       on_commit=save,
                       restart=restart)
 
@@ -76,4 +76,4 @@ def process_feature(data_set, restart=False):
 
 
 if __name__ == '__main__':
-    process_feature(DataSet('cepp'), restart=True)
+    process_feature(DataSet('core-standard'), restart=True)

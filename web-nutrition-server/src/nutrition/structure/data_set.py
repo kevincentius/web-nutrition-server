@@ -43,9 +43,9 @@ class DataSet(object):
             self.data = {}
         
         # load labels
-        if os.path.exists(self.data_path):
-            with open(self.data_path, 'r', encoding='utf8') as json_file:  
-                self.labels = json.load(json_file)
+        # if os.path.exists(self.data_path):
+        #     with open(self.data_path, 'r', encoding='utf8') as json_file:
+        #         self.labels = json.load(json_file)
     
     # Copies the file with the given path into the data set directory
     # This makes the file usable by other scripts.
@@ -55,13 +55,15 @@ class DataSet(object):
     # When importing raw_text, the labels must be set as well.
     # labels is an array of numbers
     def set_labels(self, labels):
-        self.labels = np.array(labels)
+        # self.labels = np.array(labels)
         self.data['count'] = len(labels)
         self.data['labels'] = labels
-        with open(self.data_path, 'w') as json_file:  
+        self.save_data()
+
+    def save_data(self):
+        with open(self.data_path, 'w') as json_file:
             json.dump(self.data, json_file)
-    
-    
+
     # load text from raw_text folder
     def get_text(self, text_id):
         with open(self.raw_text_path + '/' + str(text_id), 'r', encoding='utf8') as file:
@@ -129,3 +131,42 @@ class DataSet(object):
             print('feature extraction: {}'.format(feature_counter.count))
         else:
             print('feature extraction: none')
+
+    # BE CAREFUL when using this method
+    # This method will remove the n-th training data, by:
+    #   1 replacing it with the last training data
+    #   2 removing the last training data
+    def delete_row(self, text_id, delete_raw_text=True, delete_stanford_annotation=True):
+        last_id = len(self.data['labels']) - 1
+
+        if delete_raw_text:
+            print('deleting raw_text', text_id)
+            self.delete_and_replace_last(text_id, self.raw_text_path)
+
+        if delete_stanford_annotation:
+            print('deleting annotation', text_id)
+            self.delete_and_replace_last(text_id, self.stanford_path)
+
+        # update labels
+        print('deleting label', text_id)
+        self.data['labels'][text_id] = self.data['labels'][last_id]
+        self.data['labels'].pop()
+        self.data['count'] = len(labels)
+        self.save_data()
+
+
+    def delete_and_replace_last(self, text_id, folder):
+        last_id = len(self.data['labels']) - 1
+
+        current_file = folder + '/' + str(text_id)
+        last_file = folder + '/' + str(last_id)
+
+        # delete raw text
+        os.rename(current_file, current_file + '_deleted')
+
+        # replace raw text with last text
+        copyfile(last_file, current_file)
+
+        # delete last text
+        os.rename(last_file, last_file + '_moved_as_' + str(text_id))
+

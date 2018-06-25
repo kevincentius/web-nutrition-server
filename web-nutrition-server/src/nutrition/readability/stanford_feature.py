@@ -3,7 +3,9 @@ This script is for extracting features from a stanford parse tree.
 '''
 import math
 import numpy as np
+from nltk import FreqDist, SnowballStemmer
 from nltk.tree import Tree
+from nltk.corpus import stopwords
 
 from nutrition.structure.data_set import DataSet
 
@@ -129,6 +131,7 @@ def get_dependency_tree_depth(annotation):
 
         depths = np.zeros(len(deps)+1)
         depths[0] = 1
+
         while len(deps) > 0:
             remaining_deps = []
             for i in range(0, len(deps)):
@@ -138,16 +141,51 @@ def get_dependency_tree_depth(annotation):
                 else:
                     remaining_deps.append(dep)
 
-            deps = remaining_deps
+            if len(deps) == len(remaining_deps):
+                # no more steps found. All other tokens are not included in the dependency tree.
+                break
+            else:
+                deps = remaining_deps
 
         dt_depths.append(np.max(depths))
 
     return np.average(dt_depths)
 
 
+# word length > 4 and do not appear more than twice in the text
+# returns two version, with and without lemmatization
+def count_difficult_words(tokens):
+    stemmer = SnowballStemmer("english")
+
+    words = [token['word'].lower() for token in tokens]
+    lemmas = [token['lemma'].lower() for token in tokens]
+    stems = [stemmer.stem(word) for word in words]
+
+    return [count_difficult_items(item_list) for item_list in [words, lemmas, stems]]
+
+
+def count_difficult_items(items, min_length=4, min_freq=2):
+    freq_dist = FreqDist(items)
+    keys = freq_dist.keys()
+    return len([key for key in keys if len(key) >= min_length and freq_dist[key] <= min_freq])
+
+
+def count_function_words(tokens):
+    stopword_list = stopwords.words('english')
+
+    function_words = [token['word'] for token in tokens
+                      if token['word'].lower() in stopword_list
+                      and token['pos'] != 'DT']
+
+    return len(function_words)
+
+
 def get_syntactic_features(annotation):
-    num_sentences = len(annotation['sentences'])
-    sentence_trees = [Tree.fromstring(sentence['parse']) for sentence in annotation['sentences']]
+    sentences = annotation['sentences']
+    num_sentences = len(sentences)
+    tokens = [token for sentence in sentences for token in sentence['tokens']]
+
+    sentence_trees = [Tree.fromstring(sentence['parse']) for sentence in sentences]
     terminal_count, non_terminal_count = count_tags(sentence_trees)
     type_count, token_count = count_types(annotation)
     node_count = count_nodes(terminal_count, non_terminal_count)
@@ -172,8 +210,11 @@ def get_syntactic_features(annotation):
         features.append(get_sum(non_terminal_count, [tag]) / token_count)
         features.append(get_sum(non_terminal_count, [tag]) / num_sentences)
 
+    # difficult words
+    features.extend(count_difficult_words(tokens))
+
+    # others
     features.extend([
-        # --------------- others ----------------
         # depth of dependency tree
         get_dependency_tree_depth(annotation),
 
@@ -198,7 +239,10 @@ def get_syntactic_features(annotation):
         count_sum_node_depth(sentence_trees) / token_count,
 
         # average word length
-        count_sum_word_length(sentence_trees) / token_count
+        count_sum_word_length(sentence_trees) / token_count,
+
+        # function words (stopwords which are not DT/determiners)
+        count_function_words(tokens)
     ])
 
     return features
@@ -207,16 +251,23 @@ def get_syntactic_features(annotation):
 if __name__ == '__main__':
     annotation = DataSet('cepp').load_stanford_annotation(0)
 
-    # pprint.pprint(annotation)
-    # sentence_trees = [Tree.fromstring(sentence['parse']) for sentence in annotation['sentences']]
-    # sentence_trees[0].pretty_print()
-    for sentence in annotation['sentences']:
-        for token in sentence['tokens']:
-            print(token['lemma'], token['word'], token['originalText'], token['pos'])
+    #print(count_difficult_words(annotation['sentences']))
 
-    print(count_types(annotation))
-
-    # sys.exit()
-
-    print(get_syntactic_features(annotation))
-    print(len(get_syntactic_features(annotation)))
+    sentences = annotation['sentences']
+    num_sentences = len(sentences)
+    tokens = [token for sentence in sentences for token in sentence['tokens']]
+    print(count_function_words(tokens))
+    #
+    # # pprint.pprint(annotation)
+    # # sentence_trees = [Tree.fromstring(sentence['parse']) for sentence in annotation['sentences']]
+    # # sentence_trees[0].pretty_print()
+    # for sentence in annotation['sentences']:
+    #     for token in sentence['tokens']:
+    #         print(token['lemma'], token['word'], token['originalText'], token['pos'])
+    #
+    # print(count_types(annotation))
+    #
+    # # sys.exit()
+    #
+    # print(get_syntactic_features(annotation))
+    # print(len(get_syntactic_features(annotation)))
