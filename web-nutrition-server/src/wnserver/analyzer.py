@@ -1,6 +1,8 @@
 
 from newspaper import Article
 from textstat.textstat import textstat
+
+from nutrition.influence.scrapers.credibility_features import CredFeatures
 from wnserver.readability import Readability
 from wnserver.sentiment_and_subjectivity import Sentiment
 from wnserver.virality import Virality
@@ -18,6 +20,7 @@ class Analyzer(object):
         self.virality = Virality()
         self.readability = Readability()
         self.sentiment = Sentiment()
+        self.influence = CredFeatures()
         self.analyze_count = 0
 
     def call(self, func, *args):

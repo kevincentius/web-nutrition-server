@@ -64,8 +64,8 @@ class Sentiment(object):
 
 if __name__ == "__main__":
     sentiment_and_subjectivity = Sentiment()
-    article = Article('https://www.politico.com/story/2018/06/12/navarro-comments-justin-trudeau-mistake-639075')
+    article = Article('https://in.reuters.com/article/usa-immigration-trump/trump-says-illegal-immigrants-should-be-deported-with-no-judges-or-court-cases-idINKBN1JK0OR')
     article.download()
     article.parse()
-    sentiment_score, subjectivity_score = sentiment_and_subjectivity.get_sentiment(article.text)
-    print(sentiment_score, subjectivity_score)
+    scores = sentiment_and_subjectivity.get_sentiment(article.text)
+    print(scores)
