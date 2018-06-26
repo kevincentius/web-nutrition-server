@@ -1,10 +1,11 @@
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 
 from nutrition.structure.data_set import DataSet
-
+from sklearn.metrics import confusion_matrix
 
 def train_model(x, y):
     model = RandomForestClassifier(n_estimators=1000, oob_score=True, warm_start=True)
@@ -40,9 +41,9 @@ def cross_validation(data_set_name):
     accuracy = accuracy_score(y_test, predict)
     print('Cross validation accuracy:', accuracy)
 
-    print_classification_matrix(predict, y_test)
+    # print_classification_matrix(predict, y_test)
 
-    return accuracy
+    return accuracy, y_test, predict
 
 
 def leave_one_out_score(data_set_name):
@@ -88,20 +89,25 @@ def cross_corpus(train_set_name, test_set_name):
 if __name__ == '__main__':
     # which data set to use
     train_on = 'cepp'
-    test_on = 'cepp'
-    num_trials = 1
+    test_on = 'core-standard'
 
-    # evaluate model
+    # Leave one out validation (very slow)
     # leave_one_out_score('cepp')
 
-    total_acc = 0
-    accs = []
-    for i in range(0, num_trials):
-        accs.append(cross_validation(train_on))
-    print('accs:' + accs)
-    print('average cross validation accuracy:', sum(accs)/num_trials)
+    # Cross validation
+    accuracy, y_test, predict = cross_validation(train_on)
+    print(confusion_matrix(y_test, predict))
 
-    model = cross_corpus(train_on, test_on)
+    # 10-Fold Cross validation
+    x, y = DataSet(train_on).load_training_data()
+    model = RandomForestClassifier(n_estimators=1000, oob_score=True, warm_start=True)
+    print('10-Fold Cross Validation Score:', np.mean(cross_val_score(model, x, y, cv=10)))
 
     # save fully trained model
-    # DataSet(train_on).save_model(model, 'random-forest')
+    model.fit(x, y)
+    DataSet(train_on).save_model(model, 'random-forest')
+
+    # load and evaluate on train (just to see if it is correct)
+    loaded_model = DataSet(train_on).load_model('random-forest')
+    predict = loaded_model.predict(x)
+    print_classification_matrix(predict, y)

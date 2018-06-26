@@ -24,25 +24,28 @@ class Readability(object):
     def get_readability(self, text):
         if self.debug:
             print('text length: {} characters'.format(len(text)))
-        
+
         # call stanford annotate api
-        print('Calling Stanford API...')
+        if self.debug:
+            print('Calling Stanford API...')
         annotation = self.nlp.annotate(text[:1000], properties={
             'annotators': 'lemma,parse',
             'outputFormat': 'json'
         })
-        print('Calling Stanford API done.')
+        if self.debug:
+            print('Calling Stanford API done.')
 
         if type(annotation) is str:
             print('Error returned by stanford parser:', annotation)
             return 0
 
-        print('annotation', annotation)
-
         x = extract_features(text, annotation)
         
         y = self.model.predict([x])[0]
-        return 100 - y * 20
+        return {
+            "main_score": 100 - y * 20,
+            "subfeatures": []
+        }
 
 
 if __name__ == '__main__':

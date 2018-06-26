@@ -12,7 +12,7 @@ from nutrition.structure.environment import TWITTER_CONSUMER_KEY, TWITTER_CONSUM
 
 class Virality(object):
 
-    debug = True
+    debug = False
 
     def __init__(self):
         # Creating the authentication object
@@ -59,12 +59,20 @@ class Virality(object):
             print('title = ' + title)
             print('tweets per hour = ', tweets_per_hour)
 
-        return [virality, tweets_per_hour]
+        return {
+            'main_score': virality,
+
+            'subfeatures': [{
+                'name': 'Tweets per hour',
+                'percentage': virality,
+                'value': tweets_per_hour
+            }]
+        }
 
 
 if __name__ == '__main__':
     virality = Virality()
-    article = Article('https://www.politico.com/story/2018/06/12/navarro-comments-justin-trudeau-mistake-639075')
+    article = Article('https://www.bbc.com/news/world-us-canada-44608999')
 
     print('downloading')
 

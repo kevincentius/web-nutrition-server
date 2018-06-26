@@ -14,8 +14,6 @@ from nltk.corpus import wordnet as wn
 from pattern3.text.en import tag
 #corpus = "The brown fox wasn't that quick and he couldn't win the race. Hey that's a great deal!, I just bought a phone for $199. @@You'll (learn) a **lot** in the book. Python is an amazing language!,@@."
 
-print('test')
-
 # word Tokenization
 def tokenize_text(text):
     sents = nltk.sent_tokenize(text)

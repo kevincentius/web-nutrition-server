@@ -22,9 +22,7 @@ from pattern3.en import sentiment
 from contractions import fix
 
 
-
 class Sentiment(object):
-
 
     def get_sentiment(self, text):
         positive_score = 0
@@ -32,6 +30,7 @@ class Sentiment(object):
         neutral_count = 0
         positive_count = 0
         negative_count = 0
+        subjectivity_sum = 0
         sents = sent_tokenize(text)
         sents_count = len(sents)
         sents[:] = [s.strip() for s in sents]
@@ -44,7 +43,9 @@ class Sentiment(object):
             "'", '').replace('/', ' ').replace("-", '') for s in sents]
         sents[:] = [s.strip().lower() for s in sents]
         for i in range(sents_count):
-            sentiment_result = sentiment(sents[i])[0]
+            result = sentiment(sents[i])
+            sentiment_result = result[0]
+            subjectivity_sum += result[1]
             if sentiment_result == 0.0:
                 neutral_count += 1
             elif sentiment_result > 0:
@@ -54,12 +55,26 @@ class Sentiment(object):
                 negative_count += 1
                 negative_score += sentiment_result
 
-        #print(neutral_count, positive_count, negative_count)
-        print((positive_score/sents_count)**0.4, (abs(negative_score)/sents_count)**0.4)
-        avg_positive_score = positive_score / sents_count
-        avg_negative_score = abs(negative_score) / sents_count
+        avg_positive_score = positive_score / sents_count * 100
+        avg_negative_score = abs(negative_score) / sents_count * 100
         overall_score = avg_positive_score + avg_negative_score
-        return [overall_score, avg_positive_score, avg_negative_score]
+        avg_objectivity = (1 - subjectivity_sum / sents_count) * 100
+        return [{
+            'main_score': overall_score,
+
+            'subfeatures': [{
+                'name': 'Positive sentiment',
+                'percentage': avg_positive_score,
+                'value': avg_positive_score
+            }, {
+                'name': 'Negative sentiment',
+                'percentage': avg_negative_score,
+                'value': avg_negative_score
+            }]
+        }, {
+            'main_score': avg_objectivity,
+            'subfeatures': []
+        }]
 
 
 if __name__ == "__main__":

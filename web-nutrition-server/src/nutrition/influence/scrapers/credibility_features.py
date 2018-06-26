@@ -9,13 +9,14 @@ from datetime import datetime
 from nutrition.influence.scrapers.page_rank import PageRank
 from nutrition.influence.scrapers.tweeter_metrics import ExtractAuthFeatures
 import nutrition.influence.scrapers.web_trust_score as wts
+from nutrition.structure import environment
 
 
 class CredFeatures(object):
 
     def __init__(self):
-        self.__avail_scores = '../data/available_scores'
-        self.__threshold_score = '../data/threshold_score'
+        self.__avail_scores = environment.SRC_FOLDER + '/nutrition/influence/data/available_scores'
+        self.__threshold_score = environment.SRC_FOLDER + '/nutrition/influence/data/threshold_score'
         self.pr = PageRank()
         self.twit_feat = ExtractAuthFeatures()
 
@@ -35,7 +36,10 @@ class CredFeatures(object):
             write_scores.write(str(datetime.today().date())+'|'+str(query.strip().lower()) + '|' + str(scores)+'\n')
         return scores
 
-    def get_influence(self, query):
+    def get_influence(self, url):
+        extract_domain = tldextract.extract(url)
+        query = extract_domain.domain + '.' + extract_domain.suffix
+
         scores = self.get_features(query)
         """
         Normalized with google scores
@@ -66,26 +70,41 @@ class CredFeatures(object):
 
         return {
             'main_score': source_influence,
-            'web_of_trust': WOT_Score,
-            'google_page_rank': google_pagerank,
-            'cpr_score': cPR_Score,
-            'alexa_rank': alexa_rank,
-            'twitter_follower_count': followers_count,
-            'twitter_friends_count': friends_count,
-            'twitter_listed_count': listed_count
-        }
 
-    def emptytozero(self,input_string):
-        if input_string == '':
-            return '0'
-        else:
-            return input_string
+            'subfeatures': [{
+                'name': 'Web of Trust',
+                'percentage': WOT_Score,
+                'value': WOT_Score
+            }, {
+                'name': 'Alexa Rank',
+                'percentage': alexa_rank,
+                'value': alexa_rank
+            }, {
+                'name': 'Google Page Rank',
+                'percentage': google_pagerank,
+                'value': google_pagerank
+            }, {
+                'name': 'CheckPageRank.net Score',
+                'percentage': cPR_Score,
+                'value': cPR_Score
+            }, {
+                'name': 'Twitter followers',
+                'percentage': followers_count,
+                'value': followers_count
+            }, {
+                'name': 'Twitter friends',
+                'percentage': friends_count,
+                'value': friends_count
+            }, {
+                'name': 'Twitter listed',
+                'percentage': listed_count,
+                'value': listed_count
+            }]
+        }
 
 
 if __name__ == '__main__':
     cred_obj = CredFeatures()
 
-    extract_domain = tldextract.extract('https://www.nbcnews.com/storyline/immigration-border-crisis/where-s-my-kid-texas-border-desperate-parents-turn-attorneys-n886181')
-    tld = extract_domain.domain + '.' + extract_domain.suffix
-    print(cred_obj.get_influence(tld))
+    print(cred_obj.get_influence('https://in.reuters.com/article/usa-immigration-trump/trump-says-illegal-immigrants-should-be-deported-with-no-judges-or-court-cases-idINKBN1JK0OR'))
 

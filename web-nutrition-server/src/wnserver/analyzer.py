@@ -4,6 +4,7 @@ from textstat.textstat import textstat
 
 from nutrition.influence.scrapers.credibility_features import CredFeatures
 from wnserver.readability import Readability
+from wnserver.response import Response
 from wnserver.sentiment_and_subjectivity import Sentiment
 from wnserver.virality import Virality
 from wnserver.stopwatch import Stopwatch
@@ -80,59 +81,26 @@ class Analyzer(object):
             f_readability = executor.submit(self.call, self.readability.get_readability, article.text)
             f_virality = executor.submit(self.call, self.virality.get_virality, article.title)
             f_sentiment = executor.submit(self.call, self.sentiment.get_sentiment, article.text)
+            f_influence = executor.submit(self.call, self.influence.get_influence, url)
 
         # read the results (error robustness: error in a label must not stop other labels from being delivered)
-        readability = self.get_result(f_readability, 'readability', 0)
-        [virality, tweets_per_hour] = self.get_result(f_virality, 'virality', [0, 0])
-        [sentiment, subjectivity] = self.get_result(f_sentiment, 'sentiment', [0, 0])
+        result_readability = self.get_result(f_readability, 'readability')
+        result_virality = self.get_result(f_virality, 'virality')
+        [result_sentiment, result_objectivity] = self.get_result(f_sentiment, 'sentiment', [None, None])
+        result_influence = self.get_result(f_influence, 'influence')
+
+        # build response
+        response = Response()
+        response.add_label('readability', result_readability)
+        response.add_label('virality', result_virality)
+        response.add_label('sentiment', result_sentiment)
+        response.add_label('objectivity', result_objectivity)
+        response.add_label('influence', result_influence)
 
         if self.debug:
             stopwatch.finish()
 
-        gunning_fog = textstat.gunning_fog(article.text)
-        
-        # readability + some mock data
-        return {'nutrition': [
-            {
-                "name": "readability",
-                "display": "readability: " + str(round(readability)) + "%",
-                "value": readability,
-                "percentage": readability,
-                "color": "#f00"
-            },
-            {
-                "name": "virality",
-                "display": "virality: {:.3g} tweets per hour".format(tweets_per_hour),
-                "value": virality,
-                "percentage": virality,
-                "color": "#fc0"
-            },
-            {
-                "name": "sentiment",
-                "display": "sentiment: " + str(round((sentiment + 1) * 50)) + "%",
-                "value": (sentiment + 1) * 50,
-                "percentage": (sentiment + 1) * 50,
-                "color": "#0f0"
-            },
-            {
-                "name": "objectivity",
-                "display": "objectivity: " + str(round((1-subjectivity) * 100)) + "%",
-                "value": (1-subjectivity) * 100,
-                "percentage": (1-subjectivity) * 100,
-                "color": "#0cc"
-            },
-            {
-                "name": "gunning_fog",
-                "display": "gunning fog: " + str(round(gunning_fog)),
-                "value": gunning_fog,
-                "percentage": 100 - gunning_fog * 100 / 30,
-                "color": "#00f"
-            }
-        ]}
-    
-    def dump(self, obj):
-        for attr in dir(obj):
-            print("obj.%s = %r" % (attr, getattr(obj, attr)))
+        return response.dict
 
 
 if __name__ == "__main__":
