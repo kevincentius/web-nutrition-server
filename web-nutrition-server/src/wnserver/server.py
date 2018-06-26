@@ -32,12 +32,14 @@ class RestServer(BaseHTTPRequestHandler):
                     if 'error' in result:
                         self.respond(200, {
                             'url': url,
+                            'status': 'error',
                             'error': result['error']
                         })
                     else:
                         self.respond(200, {
                             'url': url,
-                            'nutrition': result['nutrition']
+                            'status': 'ok',
+                            'nutrition': result
                         })
         else:
             self.respond(400, {'error': 'Unknown request URL. Do GET to /nutrition for web nutrition analysis'})
@@ -69,4 +71,4 @@ def run(port):
 
 
 if __name__ == "__main__":
-    run(8081)
+    run(8080)
