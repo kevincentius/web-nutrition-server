@@ -1,10 +1,6 @@
+from nltk.corpus import stopwords
 
+from nutrition.structure.data_set import DataSet
 
 if __name__ == '__main__':
-    x = [1, 2, 6]
-    a = x.copy()
-    a.append(4)
-    b = sorted(a)
-    print(x)
-    print(a)
-    print(b)
+    DataSet('learning-corpus').delete_row(1437)

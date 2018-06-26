@@ -1,0 +1,10 @@
+# List of web pages that have caused errors in the past.
+# This list can be used for re-testing.
+
+# newspaper3k failed to parse
+http://localhost:8081/nutrition?url=https://www.cbsnews.com/video/iowa-gubernatorial-ballot-finalized/
+
+# virality failed to retrieve title: fixed by using html parser instead of xml parser
+https://www.wsj.com/articles/supreme-court-imposes-new-limits-on-workers-in-arbitration-cases-1526916858
+
+https://electrek.co/2018/06/12/tesla-layoffs-workforce-restructure/

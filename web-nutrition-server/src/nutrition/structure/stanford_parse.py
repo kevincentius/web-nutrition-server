@@ -13,6 +13,7 @@ from nutrition.structure.data_set import DataSet
 from nutrition.structure.counter import Counter
 import sys
 from nutrition.structure.environment import STANFORD_SERVER
+from wnserver.stopwatch import Stopwatch
 
 
 def process_stanford(data_set, restart=False):
@@ -48,9 +49,27 @@ def process_stanford(data_set, restart=False):
         # print time information
         print('%i, %i%% %.2f seconds (%.0f total))' % (counter.count-1, 100*counter.count/data_set.data['count'], time.time() - doc_start, time.time() - start))
 
+
 if __name__ == '__main__':
-    process_stanford(DataSet('cepp'), restart=True)
-    
+    process_stanford(DataSet('learning-corpus'), restart=False)
+
+    # sw = Stopwatch()
+    #
+    # data_set = DataSet('cepp')
+    # sw.lap('test')
+    # nlp = StanfordCoreNLP(STANFORD_SERVER)
+    # sw.lap('test')
+    # text = fix(data_set.get_text(0))
+    # print(text)
+    # sw.lap('test')
+    # annotation = nlp.annotate(text, properties={
+    #     'annotators': 'lemma,parse',
+    #     'outputFormat': 'json',
+    #     'coref.algorithm': 'statistical'
+    # })
+    # sw.lap('test')
+    # print(annotation)
+
     
     
     
