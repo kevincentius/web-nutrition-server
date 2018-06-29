@@ -60,12 +60,31 @@ class CredFeatures(object):
                 thresh_hold_avg['followers_count'] += threshold_scores['followers_count']
                 threshold_records += 1
         friends_count = float(scores['friends_count'])*100/(float(thresh_hold_avg['friends_count'])/threshold_records)
-        google_pagerank = float(str(scores['Google PageRank']).split('/')[0])*10
-        cPR_Score = float(str(scores['cPR Score']).split('/')[0])*10
+
+        if 'Google PageRank' in scores:
+            google_pagerank = float(str(scores['Google PageRank']).split('/')[0])*10
+        else:
+            google_pagerank = 0
+
+        if 'cPR Score' in scores:
+            cPR_Score = float(str(scores['cPR Score']).split('/')[0])*10
+        else:
+            cPR_Score = 0
+
         followers_count = float(scores['followers_count'])*100/(float(thresh_hold_avg['followers_count'])/threshold_records)
-        WOT_Score = float(str(scores['WOT Score']).split('/')[0])
+
+        if 'WOT Score' in scores:
+            WOT_Score = float(str(scores['WOT Score']).split('/')[0])
+        else:
+            WOT_Score = 0
+
         listed_count = float(scores['listed_count'])*100/(float(thresh_hold_avg['listed_count'])/threshold_records)
-        alexa_rank = (1/(math.log((float(scores['Alexa Rank'].replace(',', '')))**0.0001)+0.01))
+
+        if 'Alexa Rank' in scores:
+            alexa_rank = (1/(math.log((float(scores['Alexa Rank'].replace(',', '')))**0.0001)+0.01))
+        else:
+            alexa_rank = 0
+
         source_influence = (friends_count + google_pagerank + cPR_Score +followers_count + WOT_Score + listed_count + alexa_rank)/7
 
         return {
@@ -106,5 +125,5 @@ class CredFeatures(object):
 if __name__ == '__main__':
     cred_obj = CredFeatures()
 
-    print(cred_obj.get_influence('https://in.reuters.com/article/usa-immigration-trump/trump-says-illegal-immigrants-should-be-deported-with-no-judges-or-court-cases-idINKBN1JK0OR'))
+    print(cred_obj.get_influence('https://edition.cnn.com/2018/06/28/politics/joe-crowley-nancy-pelosi-alexandria-ocasio-cortez/index.html'))
 
