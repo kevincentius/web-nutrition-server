@@ -49,7 +49,10 @@ class Virality(object):
 
         if title:
             tweets_per_hour = self.get_tweets_per_hour(title)
-            virality = 100 - 1000 / (tweets_per_hour + 10)
+            if (tweets_per_hour > 100):
+                virality = 100
+            else:
+                virality = tweets_per_hour
         else:
             print('Failed to retrieve title')
             tweets_per_hour = 0
