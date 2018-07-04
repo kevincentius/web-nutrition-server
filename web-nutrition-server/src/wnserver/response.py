@@ -27,7 +27,7 @@ class Label:
 
 class LabelError(Label):
     def __init__(self):
-        Label.__init__(self)
+        Label.__init__(self, status='error')
 
 
 class SubFeature:
