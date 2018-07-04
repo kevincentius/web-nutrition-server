@@ -10,6 +10,7 @@ from nutrition.influence.scrapers.page_rank import PageRank
 from nutrition.influence.scrapers.tweeter_metrics import ExtractAuthFeatures
 import nutrition.influence.scrapers.web_trust_score as wts
 from nutrition.structure import environment
+from wnserver.response import SubFeature, SubFeatureError, Label
 
 
 class CredFeatures(object):
@@ -61,69 +62,43 @@ class CredFeatures(object):
                 threshold_records += 1
         friends_count = float(scores['friends_count'])*100/(float(thresh_hold_avg['friends_count'])/threshold_records)
 
-        if 'Google PageRank' in scores:
-            google_pagerank = float(str(scores['Google PageRank']).split('/')[0])*10
-        else:
-            google_pagerank = 0
-
-        if 'cPR Score' in scores:
-            cPR_Score = float(str(scores['cPR Score']).split('/')[0])*10
-        else:
-            cPR_Score = 0
-
-        followers_count = float(scores['followers_count'])*100/(float(thresh_hold_avg['followers_count'])/threshold_records)
-
+        subfeatures = []
         if 'WOT Score' in scores:
             WOT_Score = float(str(scores['WOT Score']).split('/')[0])
+            subfeatures.append(SubFeature('Web of Trust Score', WOT_Score))
         else:
-            WOT_Score = 0
-
-        listed_count = float(scores['listed_count'])*100/(float(thresh_hold_avg['listed_count'])/threshold_records)
+            subfeatures.append(SubFeatureError('Web of Trust Score'))
 
         if 'Alexa Rank' in scores:
             alexa_rank = (1/(math.log((float(scores['Alexa Rank'].replace(',', '')))**0.0001)+0.01))
         else:
             alexa_rank = 0
 
-        source_influence = (friends_count + google_pagerank + cPR_Score +followers_count + WOT_Score + listed_count + alexa_rank)/7
+        if 'Google PageRank' in scores:
+            google_pagerank = float(str(scores['Google PageRank']).split('/')[0])*10
+            subfeatures.append(SubFeature('Google Page Rank', google_pagerank))
+        else:
+            subfeatures.append(SubFeatureError('Google Page Rank'))
 
-        return {
-            'main_score': source_influence,
+        if 'cPR Score' in scores:
+            cPR_Score = float(str(scores['cPR Score']).split('/')[0])*10
+            subfeatures.append(SubFeature('CheckPageRank.net Score', cPR_Score))
+        else:
+            subfeatures.append(SubFeatureError('CheckPageRank.net Score'))
 
-            'subfeatures': [{
-                'name': 'Web of Trust',
-                'percentage': WOT_Score,
-                'value': WOT_Score
-            }, {
-                'name': 'Alexa Rank',
-                'percentage': alexa_rank,
-                'value': alexa_rank
-            }, {
-                'name': 'Google Page Rank',
-                'percentage': google_pagerank,
-                'value': google_pagerank
-            }, {
-                'name': 'CheckPageRank.net Score',
-                'percentage': cPR_Score,
-                'value': cPR_Score
-            }, {
-                'name': 'Twitter followers',
-                'percentage': followers_count,
-                'value': followers_count
-            }, {
-                'name': 'Twitter friends',
-                'percentage': friends_count,
-                'value': friends_count
-            }, {
-                'name': 'Twitter listed',
-                'percentage': listed_count,
-                'value': listed_count
-            }]
-        }
+        followers_count = float(scores['followers_count'])*100/(float(thresh_hold_avg['followers_count'])/threshold_records)
+        subfeatures.append(SubFeature('Twitter followers', followers_count))
+
+        listed_count = float(scores['listed_count'])*100/(float(thresh_hold_avg['listed_count'])/threshold_records)
+        subfeatures.append(SubFeature('Twitter listed count', listed_count))
+
+        main_score = (friends_count + google_pagerank + cPR_Score +followers_count + WOT_Score + listed_count + alexa_rank)/7
+
+        return Label(main_score, subfeatures)
 
 
 if __name__ == '__main__':
     cred_obj = CredFeatures()
 
-    print(cred_obj.get_influence('https://edition.cnn.com/2018/06/28/politics/joe-crowley-nancy-pelosi-alexandria-ocasio-cortez/index.html'))
+    print(cred_obj.get_influence('https://edition.cnn.com/2018/06/28/politics/joe-crowley-nancy-pelosi-alexandria-ocasio-cortez/index.html').dict)
 

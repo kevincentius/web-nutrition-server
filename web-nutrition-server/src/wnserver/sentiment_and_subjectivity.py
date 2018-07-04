@@ -21,6 +21,8 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 from pattern3.en import sentiment
 from contractions import fix
 
+from wnserver.response import SubFeature, Label
+
 
 class Sentiment(object):
 
@@ -59,22 +61,17 @@ class Sentiment(object):
         avg_negative_score = abs(negative_score) / sents_count * 100
         overall_score = avg_positive_score + avg_negative_score
         avg_objectivity = (1 - subjectivity_sum / sents_count) * 100
-        return [{
-            'main_score': overall_score,
 
-            'subfeatures': [{
-                'name': 'Positive sentiment',
-                'percentage': avg_positive_score,
-                'value': avg_positive_score
-            }, {
-                'name': 'Negative sentiment',
-                'percentage': avg_negative_score,
-                'value': avg_negative_score
-            }]
-        }, {
-            'main_score': avg_objectivity,
-            'subfeatures': []
-        }]
+        return [
+            # sentiment
+            Label(overall_score, [
+                SubFeature('Positive sentiment', avg_positive_score, avg_positive_score ** 0.4),
+                SubFeature('Negative sentiment', avg_negative_score, avg_negative_score ** 0.4)
+            ]),
+
+            # objectivity
+            Label(avg_objectivity, [])
+        ]
 
 
 if __name__ == "__main__":
@@ -83,4 +80,5 @@ if __name__ == "__main__":
     article.download()
     article.parse()
     scores = sentiment_and_subjectivity.get_sentiment(article.text)
-    print(scores)
+    print(scores[0].dict)
+    print(scores[1].dict)
