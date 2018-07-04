@@ -3,7 +3,10 @@ class Response:
     def __init__(self, labels):
         self.dict = {}
         for name, label in labels.items():
-            self.dict[name] = label.dict
+            if label is None:
+                self.dict[name] = LabelError()
+            else:
+                self.dict[name] = label.dict
 
 
 class Label:
