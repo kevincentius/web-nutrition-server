@@ -57,7 +57,7 @@ class Virality(object):
             # else:
             #     virality = tweets_per_hour
 
-            subfeatures.append(SubFeature('Tweets per hour', tweets_per_hour))
+            subfeatures.append(SubFeature('Tweets per hour', tweets_per_hour, tooltip='Tweet and retweet rate'))
         else:
             print('Failed to retrieve title')
             main_score = 0

@@ -67,18 +67,25 @@ class CredFeatures(object):
         score_count = 0
         if 'WOT Score' in scores:
             WOT_Score = float(str(scores['WOT Score']).split('/')[0])
-            subfeatures.append(SubFeature('Web of Trust Score', WOT_Score))
+            subfeatures.append(SubFeature('Web of Trust Score',
+                                          WOT_Score,
+                                          tooltip="Website safety score based on a crowdsourced reputation system."))
+
             score_sum += WOT_Score
             score_count += 1
         else:
             subfeatures.append(SubFeatureError('Web of Trust Score'))
 
         if 'Alexa Rank' in scores:
-            alexa_rank = (1/(math.log((float(scores['Alexa Rank'].replace(',', '')))**0.0001)+0.01))
+            raw_alexa_rank = float(scores['Alexa Rank'].replace(',', ''))
+            alexa_rank = (1/(math.log((raw_alexa_rank)**0.0001)+0.01))
+            subfeatures.append(SubFeature('Alexa Rank', raw_alexa_rank, alexa_rank,
+                                          tooltip="How much traffic on this website"))
+
             score_sum += alexa_rank
             score_count += 1
         else:
-            alexa_rank = 0
+            subfeatures.append(SubFeatureError('Alexa Rank'))
 
         if 'Google PageRank' in scores:
             google_pagerank = float(str(scores['Google PageRank']).split('/')[0])*10

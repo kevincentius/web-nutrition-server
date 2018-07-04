@@ -106,5 +106,5 @@ class Analyzer(object):
 
 if __name__ == "__main__":
     analyzer = Analyzer()
-    print(analyzer.analyze('https://en.wikipedia.org/wiki/Chess'))
+    print(analyzer.analyze('https://www.npr.org/2018/07/03/625603260/former-malaysian-prime-minister-arrested-amid-corruption-scandal'))
     #analyzer.analyze('http://money.cnn.com/2018/04/18/media/president-trump-media-protectors/index.html')
