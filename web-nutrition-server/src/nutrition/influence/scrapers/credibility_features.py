@@ -63,26 +63,36 @@ class CredFeatures(object):
         friends_count = float(scores['friends_count'])*100/(float(thresh_hold_avg['friends_count'])/threshold_records)
 
         subfeatures = []
+        score_sum = 0
+        score_count = 0
         if 'WOT Score' in scores:
             WOT_Score = float(str(scores['WOT Score']).split('/')[0])
             subfeatures.append(SubFeature('Web of Trust Score', WOT_Score))
+            score_sum += WOT_Score
+            score_count += 1
         else:
             subfeatures.append(SubFeatureError('Web of Trust Score'))
 
         if 'Alexa Rank' in scores:
             alexa_rank = (1/(math.log((float(scores['Alexa Rank'].replace(',', '')))**0.0001)+0.01))
+            score_sum += alexa_rank
+            score_count += 1
         else:
             alexa_rank = 0
 
         if 'Google PageRank' in scores:
             google_pagerank = float(str(scores['Google PageRank']).split('/')[0])*10
             subfeatures.append(SubFeature('Google Page Rank', google_pagerank))
+            score_sum += google_pagerank
+            score_count += 1
         else:
             subfeatures.append(SubFeatureError('Google Page Rank'))
 
         if 'cPR Score' in scores:
             cPR_Score = float(str(scores['cPR Score']).split('/')[0])*10
             subfeatures.append(SubFeature('CheckPageRank.net Score', cPR_Score))
+            score_sum += cPR_Score
+            score_count += 1
         else:
             subfeatures.append(SubFeatureError('CheckPageRank.net Score'))
 
@@ -92,13 +102,11 @@ class CredFeatures(object):
         listed_count = float(scores['listed_count'])*100/(float(thresh_hold_avg['listed_count'])/threshold_records)
         subfeatures.append(SubFeature('Twitter listed count', listed_count))
 
-        main_score = (friends_count + google_pagerank + cPR_Score +followers_count + WOT_Score + listed_count + alexa_rank)/7
-
-        return Label(main_score, subfeatures)
+        return Label(score_sum / score_count, subfeatures)
 
 
 if __name__ == '__main__':
     cred_obj = CredFeatures()
 
-    print(cred_obj.get_influence('https://edition.cnn.com/2018/06/28/politics/joe-crowley-nancy-pelosi-alexandria-ocasio-cortez/index.html').dict)
+    print(cred_obj.get_influence('https://www.npr.org/2018/07/03/625603260/former-malaysian-prime-minister-arrested-amid-corruption-scandal').dict)
 
