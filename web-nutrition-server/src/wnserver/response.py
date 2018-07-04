@@ -4,7 +4,7 @@ class Response:
         self.dict = {}
         for name, label in labels.items():
             if label is None:
-                self.dict[name] = LabelError()
+                self.dict[name] = LabelError().dict
             else:
                 self.dict[name] = label.dict
 
