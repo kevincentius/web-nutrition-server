@@ -8,6 +8,7 @@ from itertools import chain
 
 from nutrition.structure.environment import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_TOKEN, \
     TWITTER_ACCESS_TOKEN_SECRET
+from wnserver.response import Label, SubFeature, SubFeatureError
 
 
 class Virality(object):
@@ -47,31 +48,26 @@ class Virality(object):
         if self.debug:
             print(title)
 
+        subfeatures = []
         if title:
             tweets_per_hour = self.get_tweets_per_hour(title)
-            virality = 100 - 1000 / (tweets_per_hour + 10)
+            main_score = 100 - 1000 / (tweets_per_hour + 10)
             # if (tweets_per_hour > 100):
             #     virality = 100
             # else:
             #     virality = tweets_per_hour
+
+            subfeatures.append(SubFeature('Tweets per hour', tweets_per_hour))
         else:
             print('Failed to retrieve title')
-            tweets_per_hour = 0
-            virality = 0
+            main_score = 0
+            subfeatures.append(SubFeatureError('Tweets per hour'))
 
         if self.debug:
             print('title = ' + title)
             print('tweets per hour = ', tweets_per_hour)
 
-        return {
-            'main_score': virality,
-
-            'subfeatures': [{
-                'name': 'Tweets per hour',
-                'percentage': virality,
-                'value': tweets_per_hour
-            }]
-        }
+        return Label(main_score, subfeatures)
 
 
 if __name__ == '__main__':
@@ -101,8 +97,8 @@ if __name__ == '__main__':
             print('Failed to retrieve')
 
         article.parse()
-        score = virality.get_virality(article.title)
+        label = virality.get_virality(article.title)
 
         # print('virality = ', score)
-        print("{:<50}".format(article.title[:50]), "{:.2f}".format(score['main_score']), "{:.2f}".format(score['subfeatures'][0]['value']))
+        print("{:<50}".format(article.title[:50]), label.dict)
 

@@ -90,12 +90,13 @@ class Analyzer(object):
         result_influence = self.get_result(f_influence, 'influence')
 
         # build response
-        response = Response()
-        response.add_label('readability', result_readability)
-        response.add_label('virality', result_virality)
-        response.add_label('sentiment', result_sentiment)
-        response.add_label('objectivity', result_objectivity)
-        response.add_label('influence', result_influence)
+        response = Response({
+            'readability': result_readability,
+            'virality': result_virality,
+            'sentiment': result_sentiment,
+            'objectivity': result_objectivity,
+            'source': result_influence
+        })
 
         if self.debug:
             stopwatch.finish()
