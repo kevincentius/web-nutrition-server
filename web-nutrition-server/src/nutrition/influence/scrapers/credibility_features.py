@@ -20,6 +20,7 @@ class CredFeatures(object):
         self.__threshold_score = environment.SRC_FOLDER + '/nutrition/influence/data/threshold_score'
         self.pr = PageRank()
         self.twit_feat = ExtractAuthFeatures()
+        self.twitter = 0
 
     def get_features(self, query):
         with codecs.open(self.__avail_scores, 'r', 'utf-8') as available_scores:
@@ -50,17 +51,14 @@ class CredFeatures(object):
         thresh_hold_avg = {}
         thresh_hold_avg['followers_count'] = 0
         thresh_hold_avg['listed_count'] = 0
-        thresh_hold_avg['friends_count'] = 0
         threshold_records = 0
         with codecs.open(self.__threshold_score, 'r', 'utf-8') as thresholding:
             for line in thresholding:
                 tokens = line.split('|')
                 threshold_scores = ast.literal_eval(tokens[2])
-                thresh_hold_avg['friends_count'] += threshold_scores['friends_count']
                 thresh_hold_avg['listed_count'] += threshold_scores['listed_count']
                 thresh_hold_avg['followers_count'] += threshold_scores['followers_count']
                 threshold_records += 1
-        friends_count = float(scores['friends_count'])*100/(float(thresh_hold_avg['friends_count'])/threshold_records)
 
         subfeatures = []
         score_sum = 0
@@ -103,11 +101,26 @@ class CredFeatures(object):
         else:
             subfeatures.append(SubFeatureError('CheckPageRank.net Score'))
 
-        followers_count = float(scores['followers_count'])*100/(float(thresh_hold_avg['followers_count'])/threshold_records)
-        subfeatures.append(SubFeature('Twitter followers', followers_count))
+        if 'followers_count' in scores:
+            followers_count = float(scores['followers_count'])*100/(float(thresh_hold_avg['followers_count'])/threshold_records)
+            subfeatures.append(SubFeature('Twitter followers', followers_count))
+            score_sum += followers_count
+            score_count += 1
+            self.twitter += followers_count
+        else:
+            subfeatures.append(SubFeatureError('followers_count'))
 
-        listed_count = float(scores['listed_count'])*100/(float(thresh_hold_avg['listed_count'])/threshold_records)
-        subfeatures.append(SubFeature('Twitter listed count', listed_count))
+        if 'listed_count' in scores:
+            listed_count = float(scores['listed_count'])*100/(float(thresh_hold_avg['listed_count'])/threshold_records)
+            subfeatures.append(SubFeature('Twitter list', listed_count))
+            score_sum += followers_count
+            score_count += 1
+            self.twitter += followers_count
+        else:
+            subfeatures.append(SubFeatureError('followers_count'))
+
+        self.twitter = self.twitter/2
+        subfeatures.append(SubFeature('Twitter', self.twitter))
 
         return Label(score_sum / score_count, subfeatures)
 
