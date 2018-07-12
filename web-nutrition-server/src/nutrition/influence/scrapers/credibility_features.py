@@ -20,7 +20,6 @@ class CredFeatures(object):
         self.__threshold_score = environment.SRC_FOLDER + '/nutrition/influence/data/threshold_score'
         self.pr = PageRank()
         self.twit_feat = ExtractAuthFeatures()
-        self.twitter = 0
 
     def get_features(self, query):
         with codecs.open(self.__avail_scores, 'r', 'utf-8') as available_scores:
@@ -101,26 +100,26 @@ class CredFeatures(object):
         else:
             subfeatures.append(SubFeatureError('CheckPageRank.net Score'))
 
+        twitter_score = 0
+        twitter_features = 0
         if 'followers_count' in scores:
             followers_count = float(scores['followers_count'])*100/(float(thresh_hold_avg['followers_count'])/threshold_records)
-            subfeatures.append(SubFeature('Twitter followers', followers_count))
-            score_sum += followers_count
-            score_count += 1
-            self.twitter += followers_count
-        else:
-            subfeatures.append(SubFeatureError('followers_count'))
+            twitter_score += followers_count
+            twitter_features += 1
 
         if 'listed_count' in scores:
             listed_count = float(scores['listed_count'])*100/(float(thresh_hold_avg['listed_count'])/threshold_records)
-            subfeatures.append(SubFeature('Twitter list', listed_count))
-            score_sum += followers_count
-            score_count += 1
-            self.twitter += followers_count
-        else:
-            subfeatures.append(SubFeatureError('followers_count'))
+            twitter_score += listed_count
+            twitter_features += 1
 
-        self.twitter = self.twitter/2
-        subfeatures.append(SubFeature('Twitter', self.twitter))
+        if twitter_features > 0:
+            subfeatures.append(SubFeature('Twitter popularity', twitter_score / twitter_features,
+                                          tooltip=str(scores['followers_count']) + ' followers, '
+                                                 + str(scores['listed_count']) + ' times listed'))
+            score_sum += twitter_score/twitter_features
+            score_count += 1
+        else:
+            subfeatures.append(SubFeatureError('Twitter popularity'))
 
         return Label(score_sum / score_count, subfeatures)
 
