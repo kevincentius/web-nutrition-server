@@ -92,14 +92,6 @@ class CredFeatures(object):
         else:
             subfeatures.append(SubFeatureError('Google Page Rank'))
 
-        if 'cPR Score' in scores:
-            cPR_Score = float(str(scores['cPR Score']).split('/')[0])*10
-            subfeatures.append(SubFeature('CheckPageRank.net Score', cPR_Score))
-            score_sum += cPR_Score
-            score_count += 1
-        else:
-            subfeatures.append(SubFeatureError('CheckPageRank.net Score'))
-
         twitter_score = 0
         twitter_features = 0
         if 'followers_count' in scores:
