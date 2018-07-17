@@ -1,6 +1,6 @@
 
 # SRC_FOLDER: path to the 'src' folder, needed to load models.
-SRC_FOLDER = 'C:/Users/Muradov/web-nutrition-server/web-nutrition-server/src'
+SRC_FOLDER = 'home/webnutrition/web-nutrition-server/web-nutrition-server/src'
 
 # URL to the Stanford Core NLP Server
 STANFORD_SERVER = 'http://localhost:9000'
@@ -21,4 +21,4 @@ THRESHOLD_URL = 'google.com'
 # ROOT_FOLDER: path to the folder that contains data sets and intermediate results
 #   It is recommended to put this folder OUTSIDE the IDE's workspace as it may slow down the IDE.
 #   This is not required to start the web nutrition server.
-ROOT_FOLDER = 'D:/git/web-nutrition-server/web-nutrition-server/src/data'
+ROOT_FOLDER = 'home/webnutrition/data'
