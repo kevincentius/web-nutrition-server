@@ -57,7 +57,7 @@ class Virality(object):
             # else:
             #     virality = tweets_per_day
 
-            subfeatures.append(SubFeature('Tweets per day', tweets_per_day, tooltip='Tweet and retweet rate'))
+            subfeatures.append(SubFeature('Tweets per day', tweets_per_day, main_score, tooltip='Tweet and retweet rate'))
         else:
             print('Failed to retrieve title')
             main_score = 0
