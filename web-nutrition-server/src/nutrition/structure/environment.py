@@ -21,4 +21,4 @@ THRESHOLD_URL = 'google.com'
 # ROOT_FOLDER: path to the folder that contains data sets and intermediate results
 #   It is recommended to put this folder OUTSIDE the IDE's workspace as it may slow down the IDE.
 #   This is not required to start the web nutrition server.
-ROOT_FOLDER = 'home/webnutrition/data'
+ROOT_FOLDER = '/home/webnutrition/data'
