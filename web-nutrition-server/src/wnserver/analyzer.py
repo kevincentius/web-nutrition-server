@@ -101,6 +101,7 @@ class Analyzer(object):
         if self.debug:
             stopwatch.finish()
 
+
         return response.dict
 
 
