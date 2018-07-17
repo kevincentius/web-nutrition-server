@@ -50,35 +50,39 @@ class CredFeatures(object):
         thresh_hold_avg = {}
         thresh_hold_avg['followers_count'] = 0
         thresh_hold_avg['listed_count'] = 0
-        thresh_hold_avg['friends_count'] = 0
         threshold_records = 0
         with codecs.open(self.__threshold_score, 'r', 'utf-8') as thresholding:
             for line in thresholding:
                 tokens = line.split('|')
                 threshold_scores = ast.literal_eval(tokens[2])
-                thresh_hold_avg['friends_count'] += threshold_scores['friends_count']
                 thresh_hold_avg['listed_count'] += threshold_scores['listed_count']
                 thresh_hold_avg['followers_count'] += threshold_scores['followers_count']
                 threshold_records += 1
-        friends_count = float(scores['friends_count'])*100/(float(thresh_hold_avg['friends_count'])/threshold_records)
 
         subfeatures = []
         score_sum = 0
         score_count = 0
         if 'WOT Score' in scores:
             WOT_Score = float(str(scores['WOT Score']).split('/')[0])
-            subfeatures.append(SubFeature('Web of Trust Score', WOT_Score))
+            subfeatures.append(SubFeature('Web of Trust Score',
+                                          WOT_Score,
+                                          tooltip="Website safety score based on a crowdsourced reputation system."))
+
             score_sum += WOT_Score
             score_count += 1
         else:
             subfeatures.append(SubFeatureError('Web of Trust Score'))
 
         if 'Alexa Rank' in scores:
-            alexa_rank = (1/(math.log((float(scores['Alexa Rank'].replace(',', '')))**0.0001)+0.01))
+            raw_alexa_rank = float(scores['Alexa Rank'].replace(',', ''))
+            alexa_rank = (1/(math.log((raw_alexa_rank)**0.0001)+0.01))
+            subfeatures.append(SubFeature('Alexa Rank', raw_alexa_rank, alexa_rank,
+                                          tooltip="How much traffic on this website"))
+
             score_sum += alexa_rank
             score_count += 1
         else:
-            alexa_rank = 0
+            subfeatures.append(SubFeatureError('Alexa Rank'))
 
         if 'Google PageRank' in scores:
             google_pagerank = float(str(scores['Google PageRank']).split('/')[0])*10
@@ -88,19 +92,26 @@ class CredFeatures(object):
         else:
             subfeatures.append(SubFeatureError('Google Page Rank'))
 
-        if 'cPR Score' in scores:
-            cPR_Score = float(str(scores['cPR Score']).split('/')[0])*10
-            subfeatures.append(SubFeature('CheckPageRank.net Score', cPR_Score))
-            score_sum += cPR_Score
-            score_count += 1
+        twitter_score = 0
+        twitter_features = 0
+        if 'followers_count' in scores:
+            followers_count = float(scores['followers_count'])*100/(float(thresh_hold_avg['followers_count'])/threshold_records)
+            twitter_score += followers_count
+            twitter_features += 1
+
+        if 'listed_count' in scores:
+            listed_count = float(scores['listed_count'])*100/(float(thresh_hold_avg['listed_count'])/threshold_records)
+            twitter_score += listed_count
+            twitter_features += 1
+
+        if twitter_features > 0:
+            subfeatures.append(SubFeature('Twitter popularity', twitter_score / twitter_features,
+                                          tooltip=str(scores['followers_count']) + ' followers, '
+                                                 + str(scores['listed_count']) + ' times listed'))
+            # score_sum += twitter_score/twitter_features
+            # score_count += 1
         else:
-            subfeatures.append(SubFeatureError('CheckPageRank.net Score'))
-
-        followers_count = float(scores['followers_count'])*100/(float(thresh_hold_avg['followers_count'])/threshold_records)
-        subfeatures.append(SubFeature('Twitter followers', followers_count))
-
-        listed_count = float(scores['listed_count'])*100/(float(thresh_hold_avg['listed_count'])/threshold_records)
-        subfeatures.append(SubFeature('Twitter listed count', listed_count))
+            subfeatures.append(SubFeatureError('Twitter popularity'))
 
         return Label(score_sum / score_count, subfeatures)
 
@@ -108,5 +119,5 @@ class CredFeatures(object):
 if __name__ == '__main__':
     cred_obj = CredFeatures()
 
-    print(cred_obj.get_influence('https://www.npr.org/2018/07/03/625603260/former-malaysian-prime-minister-arrested-amid-corruption-scandal').dict)
+    print(cred_obj.get_influence('https://edition.cnn.com/2018/07/12/politics/two-trumps-nato/index.html').dict)
 

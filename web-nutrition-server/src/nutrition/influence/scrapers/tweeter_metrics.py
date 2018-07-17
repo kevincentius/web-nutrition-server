@@ -29,13 +29,11 @@ class ExtractAuthFeatures(object):
         if len(results) >= 1:
             for user in results:
                 twit_user['followers_count'] = user['followers_count']
-                twit_user['friends_count'] = user['followers_count']
                 twit_user['listed_count'] = user['listed_count']
                 twit_user['favourites_count'] = user['favourites_count']
                 break
         else:
             twit_user['followers_count'] = 0
-            twit_user['friends_count'] = 0
             twit_user['listed_count'] = 0
             twit_user['favourites_count'] = 0
         return twit_user

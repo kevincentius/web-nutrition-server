@@ -65,8 +65,11 @@ class Sentiment(object):
         return [
             # sentiment
             Label(overall_score, [
-                SubFeature('Positive sentiment', avg_positive_score, avg_positive_score ** 0.4),
-                SubFeature('Negative sentiment', avg_negative_score, avg_negative_score ** 0.4)
+                SubFeature('Positive sentiment', avg_positive_score, avg_positive_score ** 0.4,
+                           tooltip="Amount of positivity in the article's opinions"),
+
+                SubFeature('Negative sentiment', avg_negative_score, avg_negative_score ** 0.4,
+                           tooltip="Amount of negativity in the article's opinions")
             ]),
 
             # objectivity
