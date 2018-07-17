@@ -1,6 +1,6 @@
 
 # SRC_FOLDER: path to the 'src' folder, needed to load models.
-SRC_FOLDER = 'home/webnutrition/web-nutrition-server/web-nutrition-server/src'
+SRC_FOLDER = '/home/webnutrition/web-nutrition-server/web-nutrition-server/src'
 
 # URL to the Stanford Core NLP Server
 STANFORD_SERVER = 'http://localhost:9000'
