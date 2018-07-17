@@ -26,13 +26,9 @@ class Virality(object):
         self.api = tweepy.API(auth)
 
     def get_max_tweet_rate(self, title, time_window=24*3600):
-        print('test')
-        results = tweepy.Cursor(self.api.search, q=title).items(1000)
+        results = tweepy.Cursor(self.api.search, q=title).items(300)
 
-        print('fetching timestamps')
         timestamps = [result.created_at for result in results]
-        print('fetching timestamps finisheds')
-
         start = 0
         end = 0  # exclusive
 
@@ -54,14 +50,14 @@ class Virality(object):
 
         subfeatures = []
         if title:
-            tweets_per_hour = self.get_max_tweet_rate(title)
-            main_score = 100 - 1000 / (tweets_per_hour + 10)
-            # if (tweets_per_hour > 100):
+            tweets_per_day = self.get_max_tweet_rate(title)
+            main_score = 100 - 1000 / (tweets_per_day + 10)
+            # if (tweets_per_day > 100):
             #     virality = 100
             # else:
-            #     virality = tweets_per_hour
+            #     virality = tweets_per_day
 
-            subfeatures.append(SubFeature('Tweets per hour', tweets_per_hour, tooltip='Tweet and retweet rate'))
+            subfeatures.append(SubFeature('Tweets per day', tweets_per_day, tooltip='Tweet and retweet rate'))
         else:
             print('Failed to retrieve title')
             main_score = 0
@@ -69,7 +65,7 @@ class Virality(object):
 
         if self.debug:
             print('title = ' + title)
-            print('tweets per hour = ', tweets_per_hour)
+            print('tweets per hour = ', tweets_per_day)
 
         return Label(main_score, subfeatures)
 
