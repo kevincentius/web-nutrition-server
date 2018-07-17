@@ -31,6 +31,9 @@ class Virality(object):
         results = tweepy.Cursor(self.api.search, q=title).items(limit)
 
         timestamps = [result.created_at for result in results]
+        if len(timestamps) == 0:
+            return 0, time.time()
+
         time_span = (timestamps[0] - timestamps[-1]).total_seconds()
         peak_date = (timestamps[0].timestamp() + timestamps[-1].timestamp()) / 2
 
@@ -107,7 +110,7 @@ if __name__ == '__main__':
     virality = Virality()
 
     urls = [
-        'https://edition.cnn.com/2018/07/10/football/cristiano-ronaldo-real-madrid-juventus-spt-intl/index.html'
+        'https://stackoverflow.com/questions/4630704/receiving-fatal-not-a-git-repository-when-attempting-to-remote-add-a-git-repo'
     ]
 
     # article = Article('http://www.foxnews.com/politics/2018/06/25/intern-who-cursed-at-trump-is-identified-was-suspended-but-not-fired.html')
