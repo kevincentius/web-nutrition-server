@@ -1,19 +1,21 @@
+from datetime import datetime
 
 import tweepy
 from newspaper import Article
-import datetime
-from lxml.html import document_fromstring
-from lxml.etree import tostring
-from itertools import chain
+from math import log10
+
+from pymongo import MongoClient
 
 from nutrition.structure.environment import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_ACCESS_TOKEN, \
     TWITTER_ACCESS_TOKEN_SECRET
 from wnserver.response import Label, SubFeature, SubFeatureError
 
+import time
 
 class Virality(object):
 
     debug = False
+    update_interval = 15*60
 
     def __init__(self):
         # Creating the authentication object
@@ -25,47 +27,78 @@ class Virality(object):
         # Creating the api object
         self.api = tweepy.API(auth)
 
-    def get_max_tweet_rate(self, title, time_window=24*3600):
-        results = tweepy.Cursor(self.api.search, q=title).items(300)
+    def get_max_tweet_rate(self, title, time_window=24*3600, limit=1000):
+        results = tweepy.Cursor(self.api.search, q=title).items(limit)
 
         timestamps = [result.created_at for result in results]
-        start = 0
-        end = 0  # exclusive
+        time_span = (timestamps[0] - timestamps[-1]).total_seconds()
+        peak_date = (timestamps[0].timestamp() + timestamps[-1].timestamp()) / 2
 
-        tweet_max = 0
-        while end < len(timestamps):
-            while end < len(timestamps) and (timestamps[start] - timestamps[end]).total_seconds() < time_window:
-                end += 1
+        if len(timestamps) == limit and time_span < time_window:
+            # We get n tweets over less than 24 hours time span (viral)
+            tweet_max = len(timestamps) * time_window / time_span
 
-            tweet_max = max(tweet_max, end - start)
-            start += 1
+        elif len(timestamps) < limit and time_span < time_window:
+            # We get less than n tweets over less than 24 hours time span
+            # -> can be a non viral article
+            # -> can be a new article
+            #tweet_max = len(timestamps) / limit
+            tweet_max = len(timestamps) * time_window / (datetime.datetime.utcnow() - timestamps[-1]).total_seconds()
 
-        print(tweet_max)
+        else:
+            start = 0
+            end = 0  # exclusive
 
-        return tweet_max
+            tweet_max = 0
+            while end < len(timestamps):
+                while end < len(timestamps) and (timestamps[start] - timestamps[end]).total_seconds() < time_window:
+                    end += 1
 
-    def get_virality(self, title):
+                tweet_max = max(tweet_max, end - start)
+                peak_date = (timestamps[end-1].timestamp() + timestamps[start].timestamp()) / 2
+                start += 1
+
+        return tweet_max, peak_date
+
+    def get_virality(self, url, title):
         if self.debug:
             print(title)
 
-        subfeatures = []
-        if title:
-            tweets_per_day = self.get_max_tweet_rate(title)
-            main_score = 100 - 1000 / (tweets_per_day + 10)
-            # if (tweets_per_day > 100):
-            #     virality = 100
-            # else:
-            #     virality = tweets_per_day
+        client = MongoClient()
+        db = client.webNutritionDB.virality
+        entry = db.find_one({"url": url})
 
-            subfeatures.append(SubFeature('Tweets per day', tweets_per_day, main_score, tooltip='Tweet and retweet rate'))
+        tweets_per_day = 0
+        if entry and (time.time() - entry['timestamp']) < Virality.update_interval:
+            # fresh data in database --> take value from db
+            tweets_per_day = entry['tweets_per_day']
+            peak_date = entry['peak_date']
         else:
-            print('Failed to retrieve title')
-            main_score = 0
-            subfeatures.append(SubFeatureError('Tweets per hour'))
+            # old or no data in database --> calculate
+            tweets_per_day, peak_date = self.get_max_tweet_rate(title)
+
+            if entry and entry['tweets_per_day'] >= tweets_per_day:
+                tweets_per_day = entry['tweets_per_day']
+                peak_date = entry['peak_date']
+
+        # update database
+        if not entry or entry['tweets_per_day'] < tweets_per_day:
+            db.update_one({"url": url}, {"$set": {
+                "timestamp": time.time(),
+                "tweets_per_day": tweets_per_day,
+                "peak_date": peak_date
+            }}, True)
 
         if self.debug:
             print('title = ' + title)
-            print('tweets per hour = ', tweets_per_day)
+            print('tweets per day = ', tweets_per_day)
+
+        # build response
+        subfeatures = []
+        main_score = min(100.0, 73 * log10(tweets_per_day/24 + 1))
+        tooltip = 'There were estimated ' + str(tweets_per_day) + ' tweets/retweets on ' + datetime.fromtimestamp(peak_date).strftime("%d/%m/%Y")
+        subfeatures.append(
+            SubFeature('Tweets per day', tweets_per_day, main_score, tooltip=tooltip))
 
         return Label(main_score, subfeatures)
 
@@ -88,7 +121,7 @@ if __name__ == '__main__':
             print('Failed to retrieve')
 
         article.parse()
-        label = virality.get_virality(article.title)
+        label = virality.get_virality(url, article.title)
 
         # print('virality = ', score)
         print("{:<50}".format(article.title[:50]), label.dict)

@@ -108,8 +108,8 @@ class CredFeatures(object):
             subfeatures.append(SubFeature('Twitter popularity', twitter_score / twitter_features,
                                           tooltip=str(scores['followers_count']) + ' followers, '
                                                  + str(scores['listed_count']) + ' times listed'))
-            score_sum += twitter_score/twitter_features
-            score_count += 1
+            # score_sum += twitter_score/twitter_features
+            # score_count += 1
         else:
             subfeatures.append(SubFeatureError('Twitter popularity'))
 
@@ -119,5 +119,5 @@ class CredFeatures(object):
 if __name__ == '__main__':
     cred_obj = CredFeatures()
 
-    print(cred_obj.get_influence('https://www.npr.org/2018/07/03/625603260/former-malaysian-prime-minister-arrested-amid-corruption-scandal').dict)
+    print(cred_obj.get_influence('https://edition.cnn.com/2018/07/12/politics/two-trumps-nato/index.html').dict)
 

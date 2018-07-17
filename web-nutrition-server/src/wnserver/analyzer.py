@@ -79,7 +79,7 @@ class Analyzer(object):
         
         with ThreadPoolExecutor(max_workers=5) as executor:
             f_readability = executor.submit(self.call, self.readability.get_readability, article.text)
-            f_virality = executor.submit(self.call, self.virality.get_virality, article.title)
+            f_virality = executor.submit(self.call, self.virality.get_virality, article.url, article.title)
             f_sentiment = executor.submit(self.call, self.sentiment.get_sentiment, article.text)
             f_influence = executor.submit(self.call, self.influence.get_influence, url)
 
