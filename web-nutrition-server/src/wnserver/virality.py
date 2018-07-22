@@ -27,7 +27,7 @@ class Virality(object):
         # Creating the api object
         self.api = tweepy.API(auth)
 
-    def get_max_tweet_rate(self, title, time_window=24*3600, limit=1000):
+    def get_max_tweet_rate(self, title, time_window=24*3600, limit=300):
         results = tweepy.Cursor(self.api.search, q=title).items(limit)
 
         timestamps = [result.created_at for result in results]
@@ -45,8 +45,8 @@ class Virality(object):
             # We get less than n tweets over less than 24 hours time span
             # -> can be a non viral article
             # -> can be a new article
-            #tweet_max = len(timestamps) / limit
-            tweet_max = len(timestamps) * time_window / (datetime.datetime.utcnow() - timestamps[-1]).total_seconds()
+            tweet_max = len(timestamps) / limit
+            # tweet_max = len(timestamps) * time_window / (datetime.utcnow() - timestamps[-1]).total_seconds()
 
         else:
             start = 0
@@ -89,7 +89,8 @@ class Virality(object):
             db.update_one({"url": url}, {"$set": {
                 "timestamp": time.time(),
                 "tweets_per_day": tweets_per_day,
-                "peak_date": peak_date
+                "peak_date": peak_date,
+                "title": title
             }}, True)
 
         if self.debug:
@@ -110,7 +111,7 @@ if __name__ == '__main__':
     virality = Virality()
 
     urls = [
-        'https://stackoverflow.com/questions/4630704/receiving-fatal-not-a-git-repository-when-attempting-to-remote-add-a-git-repo'
+        'https://www.reuters.com/article/us-usa-russia-summit-trump/trump-tries-to-calm-political-storm-over-putin-summit-says-he-misspoke-idUSKBN1K72FL'
     ]
 
     # article = Article('http://www.foxnews.com/politics/2018/06/25/intern-who-cursed-at-trump-is-identified-was-suspended-but-not-fired.html')

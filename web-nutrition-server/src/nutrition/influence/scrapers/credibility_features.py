@@ -29,8 +29,6 @@ class CredFeatures(object):
                     if tokens[1] == query.strip().lower():
                         return ast.literal_eval(tokens[2])
         scores = wts.get_rank(query)
-        for key, value in self.pr.get_rank(query).items():
-            scores[key] = value
         for key, value in self.twit_feat.get_tweets(query).items():
             scores[key] = value
         with codecs.open(self.__avail_scores, 'a', 'utf-8') as write_scores:
@@ -73,24 +71,17 @@ class CredFeatures(object):
         else:
             subfeatures.append(SubFeatureError('Web of Trust Score'))
 
-        if 'Alexa Rank' in scores:
-            raw_alexa_rank = float(scores['Alexa Rank'].replace(',', ''))
-            alexa_rank = (1/(math.log((raw_alexa_rank)**0.0001)+0.01))
-            subfeatures.append(SubFeature('Alexa Rank', raw_alexa_rank, alexa_rank,
-                                          tooltip="How much traffic on this website"))
-
-            score_sum += alexa_rank
+        alexa_rank = self.pr.get_alexa_rank(query)
+        subfeatures.append(alexa_rank)
+        if alexa_rank is not SubFeatureError:
+            score_sum += alexa_rank.dict['percentage']
             score_count += 1
-        else:
-            subfeatures.append(SubFeatureError('Alexa Rank'))
 
-        if 'Google PageRank' in scores:
-            google_pagerank = float(str(scores['Google PageRank']).split('/')[0])*10
-            subfeatures.append(SubFeature('Google Page Rank', google_pagerank))
-            score_sum += google_pagerank
+        page_rank = self.pr.get_page_rank(query)
+        subfeatures.append(page_rank)
+        if page_rank is not SubFeatureError:
+            score_sum += page_rank.dict['percentage']
             score_count += 1
-        else:
-            subfeatures.append(SubFeatureError('Google Page Rank'))
 
         twitter_score = 0
         twitter_features = 0

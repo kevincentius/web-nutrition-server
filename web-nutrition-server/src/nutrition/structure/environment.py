@@ -16,7 +16,8 @@ TWITTER_ACCESS_TOKEN_SECRET = "lyunnQNPeBPHHnlWBFmj5fKgS6OeX58O1UF3iNP54KDax"
 # Credibility external resources
 PAGE_RANK_QUOTE = 'https://www.checkpagerank.net/'
 THRESHOLD_URL = 'google.com'
-
+OPEN_PAGE_RANK_API_URL = 'https://openpagerank.com/api/v1.0/getPageRank';
+OPEN_PAGE_RANK_API_KEY = 'gcsw00c8ccc0c8gk0wgwc0w408kc4sw4g4kgskks'
 
 # ROOT_FOLDER: path to the folder that contains data sets and intermediate results
 #   It is recommended to put this folder OUTSIDE the IDE's workspace as it may slow down the IDE.
