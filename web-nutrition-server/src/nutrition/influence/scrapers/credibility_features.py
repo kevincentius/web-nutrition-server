@@ -10,6 +10,7 @@ from nutrition.influence.scrapers.page_rank import PageRank
 from nutrition.influence.scrapers.tweeter_metrics import ExtractAuthFeatures
 import nutrition.influence.scrapers.web_trust_score as wts
 from nutrition.structure import environment
+from wnserver.database import Database
 from wnserver.response import SubFeature, SubFeatureError, Label
 
 
@@ -38,6 +39,12 @@ class CredFeatures(object):
     def get_influence(self, url):
         extract_domain = tldextract.extract(url)
         query = extract_domain.domain + '.' + extract_domain.suffix
+
+        db = Database(collection='popularity')
+        stored_result = db.find_result(query)
+
+        if stored_result and 'popularity' in stored_result:
+            return Label(ldict=stored_result['popularity'])
 
         scores = self.get_features(query)
         """
@@ -104,7 +111,9 @@ class CredFeatures(object):
         else:
             subfeatures.append(SubFeatureError('Twitter popularity'))
 
-        return Label(score_sum / score_count, subfeatures)
+        label = Label(score_sum / score_count, subfeatures)
+        db.upsert_result(query, 'popularity', label.dict)
+        return label
 
 
 if __name__ == '__main__':

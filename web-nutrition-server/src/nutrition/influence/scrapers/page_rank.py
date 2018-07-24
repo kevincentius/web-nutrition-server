@@ -58,12 +58,6 @@ class PageRank(object):
             return SubFeatureError('Page Rank')
 
 
-
-def main():
-    pr = PageRank()
-    print(pr.get_rank(sys.argv[1]))
-
-
 if __name__ == '__main__':
     print(PageRank().get_page_rank('bbc.com'))
     print(PageRank().get_alexa_rank('bbc.com'))
