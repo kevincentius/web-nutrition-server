@@ -68,7 +68,7 @@ class Virality(object):
             print(title)
 
         client = MongoClient()
-        db = client.webNutritionDB.virality
+        db = client.webNutritionDB.labels
         entry = db.find_one({"url": url})
 
         tweets_per_day = 0
