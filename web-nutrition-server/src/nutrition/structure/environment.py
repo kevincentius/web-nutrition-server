@@ -23,3 +23,9 @@ OPEN_PAGE_RANK_API_KEY = 'gcsw00c8ccc0c8gk0wgwc0w408kc4sw4g4kgskks'
 #   It is recommended to put this folder OUTSIDE the IDE's workspace as it may slow down the IDE.
 #   This is not required to start the web nutrition server.
 ROOT_FOLDER = 'D:/git/web-nutrition-server/web-nutrition-server/src/data'
+
+# Bias external resources
+BIAS_DATADIR = 'C:/Users/neelu/PycharmProjects/web-nutrition-server1/web-nutrition-server/src/nutrition/bias/data'
+BIAS_MODEL = ['bias.pkl', 'tfidf.pkl']
+BIAS_URLS = ['https://www.dropbox.com/s/hy1q9gy3maohyz6/bias.pkl?dl=1',
+            'https://www.dropbox.com/s/kyclzw2gx80v24b/tfidf.pkl?dl=1']

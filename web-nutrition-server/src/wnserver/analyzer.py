@@ -3,6 +3,7 @@ from newspaper import Article
 from textstat.textstat import textstat
 
 from nutrition.influence.scrapers.credibility_features import CredFeatures
+from nutrition.bias.model.bias_predict import NewsBias
 from wnserver.readability import Readability
 from wnserver.response import Response, Label
 from wnserver.sentiment_and_subjectivity import Sentiment
@@ -23,6 +24,7 @@ class Analyzer(object):
         self.readability = Readability()
         self.sentiment = Sentiment()
         self.influence = CredFeatures()
+        self.bias = NewsBias()
         self.analyze_count = 0
 
     def call(self, func, *args):
@@ -89,6 +91,7 @@ class Analyzer(object):
         with ThreadPoolExecutor(max_workers=5) as executor:
             f_virality = executor.submit(self.call, self.virality.get_virality, article.url, article.title)
             f_influence = executor.submit(self.call, self.influence.get_influence, url)
+            f_bias = executor.submit(self.call, self.bias.predict_bias, article.text)
 
             if 'readability' in stored_result:
                 f_readability = executor.submit(self.ret, Label(ldict=stored_result['readability']))
@@ -108,7 +111,7 @@ class Analyzer(object):
         result_readability = self.get_result(f_readability, 'readability')
         [result_sentiment, result_objectivity] = self.get_result(f_sentiment, 'sentiment', [None, None])
         result_influence = self.get_result(f_influence, 'influence')
-
+        result_bias = self.get_result(f_bias,'bias')
         if 'readability' not in stored_result and result_readability is not None:
             db.upsert_result(url, 'readability', result_readability.dict)
 
@@ -124,7 +127,8 @@ class Analyzer(object):
             'virality': result_virality,
             'sentiment': result_sentiment,
             'objectivity': result_objectivity,
-            'source': result_influence
+            'source': result_influence,
+            'bias': result_bias
         })
 
         if self.debug:
