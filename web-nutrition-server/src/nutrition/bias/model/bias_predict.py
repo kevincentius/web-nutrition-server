@@ -7,6 +7,7 @@ import requests
 from newspaper import Article
 from nutrition.bias.model.content_model_text_functions import clean
 from nutrition.structure.environment import BIAS_DATADIR, BIAS_URLS, BIAS_MODEL
+from wnserver.response import Label, LabelError
 
 
 class NewsBias(object):
@@ -29,11 +30,11 @@ class NewsBias(object):
         #print(clean_article)
         article_tfidf = besttfidf.transform([clean_article])
         if bestclf.predict(article_tfidf) == 0:
-            return 0
+            return Label(0, [])
         if bestclf.predict(article_tfidf) == 1:
-            return  100
+            return Label(100, [])
         else:
-            return -1
+            return LabelError()
 
     def download(self,url,i):
         r = requests.get(url, stream=True)
