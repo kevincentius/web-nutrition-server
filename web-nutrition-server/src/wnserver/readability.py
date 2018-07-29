@@ -23,6 +23,7 @@ class Readability(object):
         if self.debug:
             print('text length: {} characters'.format(len(text)))
 
+
         # call stanford annotate api
         if self.debug:
             print('Calling Stanford API...')
@@ -35,7 +36,7 @@ class Readability(object):
 
         if type(annotation) is str:
             print('Error returned by stanford parser:', annotation)
-            return 0
+            return None
 
         x = extract_features(text, annotation)
         

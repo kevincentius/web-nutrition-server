@@ -26,12 +26,11 @@ class ExtractAuthFeatures(object):
                                                      self.consumer_key, self.consumer_secret))
         results = authent.users.search(q=news_source)
         twit_user = {}
-        if len(results) >= 1:
-            for user in results:
-                twit_user['followers_count'] = user['followers_count']
-                twit_user['listed_count'] = user['listed_count']
-                twit_user['favourites_count'] = user['favourites_count']
-                break
+        if len(results) > 0:
+            user = results[0]
+            twit_user['followers_count'] = user['followers_count']
+            twit_user['listed_count'] = user['listed_count']
+            twit_user['favourites_count'] = user['favourites_count']
         else:
             twit_user['followers_count'] = 0
             twit_user['listed_count'] = 0

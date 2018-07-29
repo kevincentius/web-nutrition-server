@@ -10,19 +10,22 @@ class Response:
 
 
 class Label:
-    def __init__(self, main_score=None, subfeatures=None, status='ok'):
-        self.dict = {
-            'status': status
-        }
+    def __init__(self, main_score=None, subfeatures=None, status='ok', ldict=None):
+        if ldict is None:
+            self.dict = {
+                'status': status
+            }
 
-        if main_score is not None:
-            self.dict['main_score'] = main_score
-        if subfeatures is not None:
-            sf_array = []
-            for subfeature in subfeatures:
-                sf_array.append(subfeature.dict)
+            if main_score is not None:
+                self.dict['main_score'] = main_score
+            if subfeatures is not None:
+                sf_array = []
+                for subfeature in subfeatures:
+                    sf_array.append(subfeature.dict)
 
-            self.dict['subfeatures'] = sf_array
+                self.dict['subfeatures'] = sf_array
+        else:
+            self.dict = ldict
 
 
 class LabelError(Label):
